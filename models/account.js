@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     underscored: false
   });
   Account.associate = function(models) {
-    Account.belongsTo(models.User);
+    Account.belongsTo(models.User, {foreignKey: 'userId'});
+    Account.hasMany(models.TempAddress, {foreignKey: 'accountId'});
   };
   return Account;
 };

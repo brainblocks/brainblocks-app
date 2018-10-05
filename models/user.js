@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     underscored: false
   });
   User.associate = function(models) {
-    User.hasMany(models.Account);
+    User.hasMany(models.Account, {foreignKey: 'userId'});
+    User.hasMany(models.TempAddress, {foreignKey: 'userId'});
   };
   return User;
 };
