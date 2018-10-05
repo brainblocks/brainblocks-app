@@ -6,6 +6,7 @@ This is the repo for our hosted wallet app.
 Run: 
 
 ```
+npm install -g sequelize-cli
 npm install
 cp .env-example .env
 ```
