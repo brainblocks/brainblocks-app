@@ -3,15 +3,19 @@
 const User = require('./models').User;
 const Account = require('./models').Account;
 const TempAddress = require('./models').TempAddress;
+const BBTransaction = require('./models').BBTransaction;
 const async = require('async');
 
 
 
 (async function() {
+    
+    await clearTestData();
+    
     var successes = {};
 
     Promise.all([
-        testUserAccountAddressRelations().then((res) => successes.testUserAccountAddressRelations = res),
+        testUserAccountAddressRelations(testBBTransactionRelations).then((res) => successes.testUserAccountAddressRelations = res),
         // more tests here
     ])
     .then(() => console.log(successes))
@@ -49,9 +53,7 @@ async function clearTestData() {
         return true;
 }
 
-async function testUserAccountAddressRelations() {
-     
-    await clearTestData();
+async function testUserAccountAddressRelations(nextTest) {
 
     let user = await User.create({
         username: 'test',
@@ -93,6 +95,8 @@ async function testUserAccountAddressRelations() {
             .then((tempAddresses) => {
                 if (tempAddresses.length != 2)
                     return false;
+                if(nextTest)
+                    return nextTest();
                 return true;
             })
             .catch((err) => {console.error(err); return false});
@@ -105,3 +109,59 @@ async function testUserAccountAddressRelations() {
     }
 }
 
+async function testBBTransactionRelations() {
+    let user = await User.findOne({where: {username: 'test'}});
+
+    if(user) {
+        return Account.findAll({where: { userId: user.id }})
+        .then((accs) => {
+            if(accs.length == 2) {
+                return Promise.all([
+                    BBTransaction.create({
+                        fromAccount: accs[0].id,
+                        toAccount: accs[1].id,
+                        amountRai: 1000,
+                        amountUSD: 10.00
+                    }),
+                    BBTransaction.create({
+                        fromAccount: accs[0].id,
+                        toAccount: accs[1].id,
+                        amountRai: 20000,
+                        amountUSD: 0.01
+                    }),
+                    BBTransaction.create({
+                        fromAccount: accs[0].id,
+                        toAccount: accs[1].id,
+                        amountRai: 1,
+                        amountUSD: 0
+                    })
+                ])
+                .then((res) => {
+                    return Promise.all( [
+                        accs[0].getSends(),
+                        accs[1].getReceives()
+                    ])
+                    .then((res) => {
+                        if (res[0].length == res[1].length) // same sends and receives
+                            return true;
+                        return false;
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        return false;
+                    });
+                })
+                .catch((err) => {
+                    console.error(err);
+                    return false;
+                });
+            }
+            return false;
+        })
+        .catch((err) => {
+            console.error(err);
+            return false;
+        })
+    }
+    return false;
+}

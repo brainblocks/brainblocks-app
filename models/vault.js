@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true
   });
   Vault.associate = function(models) {
-    Vault.BelongsTo(models.User, {foreignKey: 'userId'});
+    Vault.belongsTo(models.User, {foreignKey: 'userId'});
   };
   return Vault;
 };
