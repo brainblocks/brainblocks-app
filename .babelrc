@@ -1,0 +1,7 @@
+{  
+    "extends": "grumbler-scripts/config/.babelrc-node",
+    "presets": ["es2015"],
+    "plugins": [
+        "add-module-exports"
+    ]
+}

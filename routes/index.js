@@ -1,15 +1,16 @@
-var express = require('express');
-var router = express.Router();
+/* @flow */
+let express = require('express');
+
+let router = express.Router();
 
 const UsersController = require('../controllers').users;
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', (req, res, next) => {
+    res.render('index', { title: 'Express' });
 });
 
 
 module.exports = router;
-
 
 
