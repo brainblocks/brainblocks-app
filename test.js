@@ -1,36 +1,16 @@
 /* @flow */
 
+import models from './models';
 
-import { User } from './models';
-
-const Account = require('./models').Account;
-const TempAddress = require('./models').TempAddress;
-const BBTransaction = require('./models').BBTransaction;
-
-const async = require('async');
-
-
-(async function() {
-    
-    await clearTestData();
-    
-    let successes = {};
-
-    Promise.all([
-        testUserAccountAddressRelations(testBBTransactionRelations).then((res) => successes.testUserAccountAddressRelations = res)
-        // more tests here
-    ])
-        .then(() => console.log(successes))
-        .catch((err) => console.log(err));
-
-}());
-
-
+const User = models.models.User;
+const Account = models.models.Account;
+const BBTransaction = models.models.BBTransaction;
+const TempAddress = models.models.TempAddress;
 /*
  * Functions
  */
 
-async function clearTestData() {
+async function clearTestData() : Promise<boolean> {
     
     let user = await User.findOne({
         where: {
@@ -41,20 +21,24 @@ async function clearTestData() {
 
     if (user) {
         let accs = await user.getAccounts();
-        for (acc in accs) {
-            accs[acc].destroy();
+        for (let acc in accs) {
+            if (accs[acc]) {
+                accs[acc].destroy();
+            }
         }
 
         let addr = await user.getTempAddresses();
-        for (a in addr) {
-            addr[a].destroy();
+        for (let a in addr) {
+            if (addr[a]) {
+                addr[a].destroy();
+            }
         }
 
         return user.destroy();
     } else { return true; }
 }
 
-async function testUserAccountAddressRelations(nextTest) {
+async function testUserAccountAddressRelations(nextTest) : Promise<boolean> {
 
     let user = await User.create({
         username: 'test',
@@ -74,7 +58,7 @@ async function testUserAccountAddressRelations(nextTest) {
             })
         ]);
 
-        let accs2 = await user.getAccounts();
+        await user.getAccounts();
 
 
         return Promise.all([
@@ -94,13 +78,23 @@ async function testUserAccountAddressRelations(nextTest) {
             .then(() => {
                 return accs[0].getTempAddresses()
                     .then((tempAddresses) => {
-                        if (tempAddresses.length != 2) { return false; }
-                        if (nextTest) { return nextTest(); }
+                        if (tempAddresses.length !== 2) {
+                            return false;
+                        }
+                        if (nextTest) {
+                            return nextTest();
+                        }
                         return true;
                     })
-                    .catch((err) => { console.error(err); return false; });
+                    .catch((err) => {
+                        console.error(err);
+                        return false;
+                    });
             })
-            .catch((err) => { console.error(err); return false; });
+            .catch((err) => {
+                console.error(err);
+                return false;
+            });
 
     } catch (err) {
         console.error(err);
@@ -108,13 +102,14 @@ async function testUserAccountAddressRelations(nextTest) {
     }
 }
 
-async function testBBTransactionRelations() {
+async function testBBTransactionRelations() : Promise<boolean> {
+    
     let user = await User.findOne({ where: { username: 'test' } });
 
     if (user) {
         return Account.findAll({ where: { userId: user.id } })
             .then((accs) => {
-                if (accs.length == 2) {
+                if (accs.length === 2) {
                     return Promise.all([
                         BBTransaction.create({
                             fromAccount: accs[0].id,
@@ -135,13 +130,13 @@ async function testBBTransactionRelations() {
                             amountUSD:   0
                         })
                     ])
-                        .then((res) => {
+                        .then(() => {
                             return Promise.all([
                                 accs[0].getSends(),
                                 accs[1].getReceives()
                             ])
                                 .then((res) => {
-                                    if (res[0].length == res[1].length) // same sends and receives
+                                    if (res[0].length === res[1].length) // same sends and receives
                                     { return true; }
                                     return false;
                                 })
@@ -164,3 +159,21 @@ async function testBBTransactionRelations() {
     }
     return false;
 }
+
+/**
+ * Run tests
+ */
+(async () => {
+    
+    await clearTestData();
+    
+    let successes = {};
+
+    Promise.all([
+        testUserAccountAddressRelations(testBBTransactionRelations).then((res) => { successes.testUserAccountAddressRelations = res; })
+        // more tests here
+    ])
+        .then(() => console.log(successes))
+        .catch((err) => console.log(err));
+
+})();
