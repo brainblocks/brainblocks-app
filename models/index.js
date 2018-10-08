@@ -1,15 +1,17 @@
 /* @flow */
 
-
-import fs from 'fs';
-import path from 'path';
-
 import Sequelize from 'sequelize';
 
-const basename = path.basename(__filename);
+import conf from '../config/sequelize';
+
+import User from './user';
+import Account from './account';
+import BBTransaction from './bbtransaction';
+import TempAddress from './tempaddress';
+import Vault from './vault';
+
 const env = process.env.NODE_ENV || 'development';
-const config = require(`${ __dirname  }/../config/sequelize.js`)[env];
-let db = {};
+const config = conf[env];
 
 let sequelize;
 if (config.use_env_variable) {
@@ -18,23 +20,22 @@ if (config.use_env_variable) {
     sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
-fs
-    .readdirSync(__dirname)
-    .filter(file => {
-        return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-    })
-    .forEach(file => {
-        const model = sequelize.import(path.join(__dirname, file));
-        db[model.name] = model;
-    });
+const models = {
+    User:          User.init(sequelize, Sequelize),
+    Account:       Account.init(sequelize, Sequelize),
+    BBTransaction: BBTransaction.init(sequelize, Sequelize),
+    TempAddress:   TempAddress.init(sequelize, Sequelize),
+    Vault:         Vault.init(sequelize, Sequelize)
+};
 
-Object.keys(db).forEach(modelName => {
-    if (db[modelName].associate) {
-        db[modelName].associate(db);
-    }
-});
+Object.values(models)
+    .filter(model => typeof model.associate === 'function')
+    .forEach(model => model.associate(models));
+  
+const db = {
+    models,
+    Sequelize,
+    sequelize
+};
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
-exports = db;
+export default db;

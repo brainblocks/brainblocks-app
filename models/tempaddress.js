@@ -1,18 +1,27 @@
 /* @flow */
+import Sequelize from 'sequelize';
 
-module.exports = (sequelize, DataTypes) => {
-    const TempAddress = sequelize.define('TempAddress', {
-        userId:              DataTypes.INTEGER,
-        accountId:           DataTypes.INTEGER,
-        encryptedPrivateKey: DataTypes.STRING,
-        nanoAddress:         DataTypes.STRING,
-        active:              DataTypes.BOOLEAN
-    }, {
-        timestamps:  true,
-        underscored: false
-    });
-    TempAddress.associate = function(models) {
-        TempAddress.belongsTo(models.Account, { foreignKey: 'accountId' });
-    };
-    return TempAddress;
-};
+class TempAddress extends Sequelize.Model {
+    static init (sequelize, DataTypes) : Sequelize.Model {
+        return super.init(
+            {
+                userId:              DataTypes.INTEGER,
+                accountId:           DataTypes.INTEGER,
+                encryptedPrivateKey: DataTypes.STRING,
+                nanoAddress:         DataTypes.STRING,
+                active:              DataTypes.BOOLEAN
+            },
+            {
+                sequelize,
+                timestamps:  true,
+                underscored: false
+            }
+        );
+    }
+
+    static associate(models) {
+        this.account = this.belongsTo(models.Account, { foreignKey: 'accountId' });
+    }
+}
+
+export default TempAddress;

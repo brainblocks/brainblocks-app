@@ -1,25 +1,34 @@
 /* @flow */
-const sequelize = require("sequelize");
+import Sequelize from 'sequelize';
 
-let User = sequelize.define('User', {
-    username:      sequelize.STRING,
-    email:         sequelize.STRING,
-    passHash:      sequelize.STRING,
-    firstName:     sequelize.STRING,
-    lastName:      sequelize.STRING,
-    birthday:      sequelize.STRING,
-    is2FAEnabled:  sequelize.BOOLEAN,
-    _2FATypeId:    sequelize.INTEGER,
-    _2FAKey:       sequelize.INTEGER,
-    _2FALastValue: sequelize.STRING
-}, {
-    timestamps:  true,
-    underscored: false
-});
-User.associate = (models) => {
-    User.hasMany(models.Account, { foreignKey: 'userId' });
-    User.hasMany(models.TempAddress, { foreignKey: 'userId' });
-    User.hasOne(models.Vault, { foreignKey: 'userId' });
-};
+class User extends Sequelize.Model {
+    static init (sequelize, DataTypes) : Sequelize.Model {
+        return super.init(
+            {
+                username:      DataTypes.STRING,
+                email:         DataTypes.STRING,
+                passHash:      DataTypes.STRING,
+                firstName:     DataTypes.STRING,
+                lastName:      DataTypes.STRING,
+                birthday:      DataTypes.STRING,
+                is2FAEnabled:  DataTypes.BOOLEAN,
+                _2FATypeId:    DataTypes.INTEGER,
+                _2FAKey:       DataTypes.STRING,
+                _2FALastValue: DataTypes.STRING
+            },
+            {
+                sequelize,
+                timestamps:  true,
+                underscored: false
+            }
+        );
+    }
+
+    static associate(models) {
+        this.accounts = this.hasMany(models.Account, { foreignKey: 'userId' });
+        this.tempAddresses = this.hasMany(models.TempAddress, { foreignKey: 'userId' });
+        this.vault = this.hasOne(models.Vault, { foreignKey: 'userId' });
+    }
+}
 
 export default User;
