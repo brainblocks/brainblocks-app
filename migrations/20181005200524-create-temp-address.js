@@ -1,6 +1,6 @@
 /* @flow */
 
-module.exports = {
+export default {
     up: (queryInterface, Sequelize) => {
         return queryInterface.createTable('TempAddresses', {
             id: {
@@ -40,7 +40,7 @@ module.exports = {
             }
         });
     },
-    down: (queryInterface, Sequelize) => {
+    down: (queryInterface) => {
         return queryInterface.dropTable('TempAddresses');
     }
 };

@@ -1,6 +1,6 @@
 /* @flow */
 
-module.exports = {
+export default {
     up: (queryInterface, Sequelize) => {
         return queryInterface.createTable('Accounts', {
             id: {
@@ -41,7 +41,7 @@ module.exports = {
                 fields: [ 'userId', 'label' ]
             }));
     },
-    down: (queryInterface, Sequelize) => {
+    down: (queryInterface) => {
         return queryInterface.dropTable('Accounts');
     }
 };
