@@ -1,13 +1,13 @@
 /* @flow */
-let path = require('path');
+import path from 'path';
 
-let createError = require('http-errors');
-let express = require('express');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
+import createError from 'http-errors';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
 
-let indexRouter = require('./routes/index');
-let usersRouter = require('./routes/users');
+import indexRouter from './routes/index';
+import usersRouter from './routes/users';
 
 let app = express();
 
@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -40,4 +40,4 @@ app.use((err, req, res, next) => {
     res.render('error');
 });
 
-module.exports = app;
+export default app;

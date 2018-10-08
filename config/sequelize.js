@@ -1,8 +1,10 @@
 /* @flow */
 
-const dotenv = require('dotenv').config();
+import config from 'dotenv';
 
-module.exports = {
+config.config();
+
+export default {
     development: {
         database: process.env.DB_NAME,
         username: process.env.DB_USER,
