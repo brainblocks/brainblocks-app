@@ -2,7 +2,7 @@
 import Sequelize from 'sequelize';
 
 class Vault extends Sequelize.Model {
-    static init (sequelize, DataTypes) : Sequelize.Model {
+    static init (sequelize : Object, DataTypes : Object) : Sequelize.Model {
         return super.init(
             {
                 userId:          DataTypes.INTEGER,
@@ -21,7 +21,7 @@ class Vault extends Sequelize.Model {
         );
     }
 
-    static associate(models) {
+    static associate(models : Object) {
         this.account = this.belongsTo(models.User, { foreignKey: 'userId' });
     }
 }

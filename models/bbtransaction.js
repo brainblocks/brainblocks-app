@@ -2,7 +2,7 @@
 import Sequelize from 'sequelize';
 
 class BBTransaction extends Sequelize.Model {
-    static init (sequelize, DataTypes) : Sequelize.Model {
+    static init (sequelize : Object, DataTypes : Object) : Sequelize.Model {
         return super.init(
             {
                 fromAccount:            DataTypes.INTEGER,
@@ -22,7 +22,7 @@ class BBTransaction extends Sequelize.Model {
         );
     }
 
-    static associate(models) {
+    static associate(models : Object) {
         this.sender = this.belongsTo(models.Account, { foreignKey: 'fromAccount' });
         this.receiver = this.belongsTo(models.Account, { foreignKey: 'toAccount' });
     }

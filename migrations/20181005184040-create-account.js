@@ -1,39 +1,39 @@
 /* @flow */
 
 export default {
-    up: (queryInterface, Sequelize) => {
+    up: (queryInterface : Object, sequelize : Object) => {
         return queryInterface.createTable('Accounts', {
             id: {
                 allowNull:     false,
                 autoIncrement: true,
                 primaryKey:    true,
-                type:          Sequelize.INTEGER
+                type:          sequelize.INTEGER
             },
             userId: {
-                type:      Sequelize.INTEGER,
+                type:      sequelize.INTEGER,
                 allowNull: false
             },
             label: {
-                type:      Sequelize.STRING,
+                type:      sequelize.STRING,
                 allowNull: false
             },
             balance: {
-                type:         Sequelize.BIGINT,
+                type:         sequelize.BIGINT,
                 defaultValue: 0,
                 allowNull:    false
             },
             balanceLastUpdated: {
-                type:         Sequelize.DATE,
+                type:         sequelize.DATE,
                 defaultValue: 0,
                 allowNull:    false
             },
             createdAt: {
                 allowNull: false,
-                type:      Sequelize.DATE
+                type:      sequelize.DATE
             },
             updatedAt: {
                 allowNull: false,
-                type:      Sequelize.DATE
+                type:      sequelize.DATE
             }
         })
             .then(() => queryInterface.addIndex('Accounts', {
@@ -41,7 +41,7 @@ export default {
                 fields: [ 'userId', 'label' ]
             }));
     },
-    down: (queryInterface) => {
+    down: (queryInterface : Object) => {
         return queryInterface.dropTable('Accounts');
     }
 };

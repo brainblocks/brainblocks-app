@@ -1,7 +1,7 @@
 /* @flow */
 
 export default {
-    up: (queryInterface, Sequelize) => {
+    up: (queryInterface : Object, Sequelize : Object) => {
         return queryInterface.createTable('TempAddresses', {
             id: {
                 allowNull:     false,
@@ -40,7 +40,7 @@ export default {
             }
         });
     },
-    down: (queryInterface) => {
+    down: (queryInterface : Object) => {
         return queryInterface.dropTable('TempAddresses');
     }
 };

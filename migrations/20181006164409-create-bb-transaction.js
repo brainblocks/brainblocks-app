@@ -1,7 +1,7 @@
 /* @flow */
 
 export default {
-    up: (queryInterface, Sequelize) => {
+    up: (queryInterface : Object, Sequelize : Object) => {
         return queryInterface.createTable('BBTransactions', {
             id: {
                 allowNull:     false,
@@ -51,7 +51,7 @@ export default {
             }
         });
     },
-    down: (queryInterface) => {
+    down: (queryInterface : Object) => {
         return queryInterface.dropTable('BBTransactions');
     }
 };

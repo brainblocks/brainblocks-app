@@ -29,7 +29,9 @@ const models = {
 };
 
 Object.values(models)
+    // $FlowFixMe
     .filter(model => typeof model.associate === 'function')
+    // $FlowFixMe
     .forEach(model => model.associate(models));
   
 const db = {

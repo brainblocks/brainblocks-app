@@ -2,7 +2,7 @@
 import Sequelize from 'sequelize';
 
 class User extends Sequelize.Model {
-    static init (sequelize, DataTypes) : Sequelize.Model {
+    static init (sequelize : Object, DataTypes : Object) : Sequelize.Model {
         return super.init(
             {
                 username:      DataTypes.STRING,
@@ -24,7 +24,7 @@ class User extends Sequelize.Model {
         );
     }
 
-    static associate(models) {
+    static associate(models : Object) {
         this.accounts = this.hasMany(models.Account, { foreignKey: 'userId' });
         this.tempAddresses = this.hasMany(models.TempAddress, { foreignKey: 'userId' });
         this.vault = this.hasOne(models.Vault, { foreignKey: 'userId' });
