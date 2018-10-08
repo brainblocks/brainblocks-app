@@ -1,10 +1,8 @@
-/* @flow */
+// no lint here, es6 breaks sequelize-cli
 
-import config from 'dotenv';
+const config = require('dotenv').config();
 
-config.config();
-
-export default {
+module.exports = {
     development: {
         database: process.env.DB_NAME,
         username: process.env.DB_USER,
