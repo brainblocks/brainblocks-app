@@ -7,7 +7,7 @@
     "flow": "flow",
     "lint": "eslint controllers/ routes/ migrations/ models/ config/ *.js",
     "test": "babel-node test.js",
-    "sequelize": "sequelize $*"
+    "sequelize": "babel-node ./node_modules/.bin/sequelize $*"
   },
   "dependencies": {
     "async": "^2.6.1",

@@ -14,8 +14,8 @@ cp .env-example .env
 Then edit the DB settings at `.env` and:
 
 ```
-sequelize db:create
-sequelize db:migrate
+npm run sequelize db:create
+npm run sequelize db:migrate
 ```
 
 ## Config
