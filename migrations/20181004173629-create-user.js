@@ -31,6 +31,11 @@ export default {
                 type:      Sequelize.STRING,
                 allowNull: true
             },
+            preferredCurrency: {
+                type:         Sequelize.STRING,
+                allowNull:    false,
+                defaultValue: 'USD'
+            },
             birthday: {
                 type:      Sequelize.DATE,
                 allowNull: true

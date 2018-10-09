@@ -23,8 +23,8 @@ class BBTransaction extends Sequelize.Model {
     }
 
     static associate(models : Object) {
-        this.sender = this.belongsTo(models.Account, { foreignKey: 'fromAccount' });
-        this.receiver = this.belongsTo(models.Account, { foreignKey: 'toAccount' });
+        this.sender = this.belongsTo(models.Account, { as: 'SenderAccount', foreignKey: 'fromAccount' });
+        this.receiver = this.belongsTo(models.Account, { as: 'ReceiverAccount', foreignKey: 'toAccount' });
     }
 }
 

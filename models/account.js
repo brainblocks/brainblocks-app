@@ -23,6 +23,7 @@ class Account extends Sequelize.Model {
         this.tempAddresses = this.hasMany(models.TempAddress, { foreignKey: 'accountId' });
         this.receives = this.hasMany(models.BBTransaction, { as: 'Receives', foreignKey: 'toAccount' });
         this.sends = this.hasMany(models.BBTransaction, { as: 'Sends', foreignKey: 'fromAccount' });
+        this.globalTransactions = this.hasMany(models.GlobalTransaction, { foreignKey: 'accountId' });
     }
 }
 
