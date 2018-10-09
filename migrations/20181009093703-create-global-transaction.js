@@ -66,7 +66,7 @@ export default {
             });
         });
     },
-    down: (queryInterface) => {
+    down: (queryInterface : Object) => {
         return queryInterface.dropTable('GlobalTransactions');
     }
 };
