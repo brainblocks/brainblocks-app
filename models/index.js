@@ -7,8 +7,12 @@ import conf from '../config/sequelize';
 import User from './user';
 import Account from './account';
 import BBTransaction from './bbtransaction';
+import GlobalTransaction from './globaltransaction';
 import TempAddress from './tempaddress';
 import Vault from './vault';
+import ColdWallet from './coldwallet';
+import HotWallet from './hotwallet';
+import HotColdWalletTransfer from './hotcoldwallettransfer';
 
 const env = process.env.NODE_ENV || 'development';
 const config = conf[env];
@@ -21,11 +25,15 @@ if (config.use_env_variable) {
 }
 
 const models = {
-    User:          User.init(sequelize, Sequelize),
-    Account:       Account.init(sequelize, Sequelize),
-    BBTransaction: BBTransaction.init(sequelize, Sequelize),
-    TempAddress:   TempAddress.init(sequelize, Sequelize),
-    Vault:         Vault.init(sequelize, Sequelize)
+    User:                  User.init(sequelize, Sequelize),
+    Account:               Account.init(sequelize, Sequelize),
+    BBTransaction:         BBTransaction.init(sequelize, Sequelize),
+    GlobalTransaction:     GlobalTransaction.init(sequelize, Sequelize),
+    TempAddress:           TempAddress.init(sequelize, Sequelize),
+    Vault:                 Vault.init(sequelize, Sequelize),
+    ColdWallet:            ColdWallet.init(sequelize, Sequelize),
+    HotWallet:             HotWallet.init(sequelize, Sequelize),
+    HotColdWalletTransfer: HotColdWalletTransfer.init(sequelize, Sequelize)
 };
 
 Object.values(models)
