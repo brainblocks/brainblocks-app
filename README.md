@@ -18,6 +18,9 @@ npm run sequelize db:create
 npm run sequelize db:migrate
 ```
 
+**NOTE:** Some sequelize cli commands may not work as expected (or not work at all) because of the change to es6. For example, `npm run sequelize model:generate`. The db ones work fine though :)
+
+
 ## Config
 For the sake of not commiting keys and passwords to git they should be at .env.
 Add them to .env-example too with dummy values to stay consistent :)
