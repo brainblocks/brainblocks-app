@@ -13,6 +13,7 @@ import Vault from './vault';
 import ColdWallet from './coldwallet';
 import HotWallet from './hotwallet';
 import HotColdWalletTransfer from './hotcoldwallettransfer';
+import NanoPrice from './nanoprice';
 
 const env = process.env.NODE_ENV || 'development';
 const config = conf[env];
@@ -33,7 +34,8 @@ const models = {
     Vault:                 Vault.init(sequelize, Sequelize),
     ColdWallet:            ColdWallet.init(sequelize, Sequelize),
     HotWallet:             HotWallet.init(sequelize, Sequelize),
-    HotColdWalletTransfer: HotColdWalletTransfer.init(sequelize, Sequelize)
+    HotColdWalletTransfer: HotColdWalletTransfer.init(sequelize, Sequelize),
+    NaoPrice:              NanoPrice.init(sequelize, Sequelize)
 };
 
 Object.values(models)

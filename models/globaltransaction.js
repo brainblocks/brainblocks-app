@@ -27,7 +27,6 @@ class GlobalTransaction extends Sequelize.Model {
     static associate(models : Object) {
         this.user = this.belongsTo(models.User, { foreignKey: 'userId' });
         this.account = this.belongsTo(models.Account, { foreignKey: 'accountId' });
-        this.user = this.belongsTo(models.User, { foreignKey: 'userId' });
     }
 
     static beforeCreate(transaction : self) {

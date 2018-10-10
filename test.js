@@ -205,7 +205,7 @@ function testHotColdWalletsRelations() : Promise<boolean> {
         ColdWallet.create({
             nanoAddress: 'test_addr2'
         })
-    ]).then((wallets : Array<any>) => {
+    ]).then((wallets : Array<Sequelize.Model>) => {
         return Promise.all([
             HotColdWalletTransfer.create({
                 nanoTxId:    'test',
