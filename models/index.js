@@ -14,6 +14,11 @@ import ColdWallet from './coldwallet';
 import HotWallet from './hotwallet';
 import HotColdWalletTransfer from './hotcoldwallettransfer';
 import NanoPrice from './nanoprice';
+import AuthorizedDevice from './authorizeddevice';
+import AuthorizedGeoZone from './authorizedgeozone';
+import AuthorizedIp from './authorizedip';
+import LoginLog from './loginlog';
+import PasswordReset from './passwordreset';
 
 const env = process.env.NODE_ENV || 'development';
 const config = conf[env];
@@ -35,7 +40,12 @@ const models = {
     ColdWallet:            ColdWallet.init(sequelize, Sequelize),
     HotWallet:             HotWallet.init(sequelize, Sequelize),
     HotColdWalletTransfer: HotColdWalletTransfer.init(sequelize, Sequelize),
-    NaoPrice:              NanoPrice.init(sequelize, Sequelize)
+    NanoPrice:             NanoPrice.init(sequelize, Sequelize),
+    AuthorizedDevice:      AuthorizedDevice.init(sequelize, Sequelize),
+    AuthorizedGeoZone:     AuthorizedGeoZone.init(sequelize, Sequelize),
+    AuthorizedIp:          AuthorizedIp.init(sequelize, Sequelize),
+    LoginLog:              LoginLog.init(sequelize, Sequelize),
+    PasswordReset:         PasswordReset.init(sequelize, Sequelize)
 };
 
 Object.values(models)
