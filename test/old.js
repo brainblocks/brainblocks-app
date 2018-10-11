@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import Sequelize from 'sequelize';
 
-import models from './models';
+import models from '../models';
 
 const User = models.models.User;
 const Account = models.models.Account;
@@ -277,7 +277,14 @@ function testHotColdWalletsRelations() : Promise<boolean> {
         testHotColdWalletsRelations().then((res) => { successes.testHotColdWalletsRelations = res; })
         // more tests here
     ])
-        .then(() => console.log(successes))
-        .catch((err) => console.log(err));
-
+        .then(() => {
+            console.log(successes);
+            process.exit();
+        })
+        .catch((err) => {
+            console.log(err);
+            process.exit();
+        });
 })();
+
+
