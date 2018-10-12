@@ -10,8 +10,11 @@ module.exports = {
         host:     process.env.DB_HOST,
         port:     process.env.DB_PORT,
         dialect:  process.env.DB_CONNECTION,
+        logging:  process.env.LOGGING === 'true' ? console.log : false,
+        operatorsAliases: false,
         define:   {
-            underscored: true
+            underscored: false,
+            timestamps: true
         }
     }
 };

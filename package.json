@@ -6,7 +6,7 @@
     "start": "babel-node ./bin/www",
     "flow": "flow",
     "lint": "eslint controllers/ routes/ migrations/ models/ config/ test/ *.js",
-    "test": "npm run lint && npm run flow && mocha --require babel-register test/index.js --exit",
+    "test": "npm run lint && npm run flow && LOGGING=false mocha --require babel-register --exit test/index.js",
     "sequelize": "babel-node ./node_modules/.bin/sequelize $*"
   },
   "dependencies": {

@@ -2,6 +2,9 @@
 import request from 'supertest';
 
 import app from '../app';
+import models from '../models';
+
+const User = models.models.User;
 
 // $FlowFixMe
 describe('App', () => {
@@ -26,5 +29,15 @@ describe('App', () => {
                 }
                 done();
             });
+    });
+
+    it('Database responds', (done : Function) => {
+        User.findOne({ where: {
+            username: 'test'
+        } }).then(() => {
+            done();
+        }).catch((err) => {
+            done(err);
+        });
     });
 });
