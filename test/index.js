@@ -40,4 +40,26 @@ describe('App', () => {
             done(err);
         });
     });
+
+    it('Sign up test', (done : Function) => {
+        User.destroy({
+            where: {
+                username: 'mochatest',
+                email:    'mochatest@bb.io'
+            },
+            individualHooks: true
+        }).then(() => {
+            request(app).post('/api/users')
+                .set('Content-Type', 'application/json')
+                .send({ username: 'mochatest', email: 'mochatest@bb.io', password: 'Password.123' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    done(err);
+                });
+        });
+    });
 });

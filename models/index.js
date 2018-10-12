@@ -19,6 +19,7 @@ import AuthorizedGeoZone from './authorizedgeozone';
 import AuthorizedIp from './authorizedip';
 import LoginLog from './loginlog';
 import PasswordReset from './passwordreset';
+import UserToken from './usertoken';
 
 const env = process.env.NODE_ENV || 'development';
 const config = conf[env];
@@ -45,7 +46,8 @@ const models = {
     AuthorizedGeoZone:     AuthorizedGeoZone.init(sequelize, Sequelize),
     AuthorizedIp:          AuthorizedIp.init(sequelize, Sequelize),
     LoginLog:              LoginLog.init(sequelize, Sequelize),
-    PasswordReset:         PasswordReset.init(sequelize, Sequelize)
+    PasswordReset:         PasswordReset.init(sequelize, Sequelize),
+    UserToken:             UserToken.init(sequelize, Sequelize)
 };
 
 Object.values(models)
