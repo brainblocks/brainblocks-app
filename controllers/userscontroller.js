@@ -95,4 +95,8 @@ exp.login = (req : Object, res : Object) => {
     
 };
 
+exp.getUser = (req : Object, res : Object) => {
+    return res.status(200).send({ user: req.user.getPublicData(), status: 'success' });
+};
+
 export default exp;

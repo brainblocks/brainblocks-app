@@ -78,15 +78,32 @@ describe('App', () => {
     });
 
     it('Login test (email)', (done : Function) => {
+        let token;
         request(app).post('/api/users/login')
             .set('Content-Type', 'application/json')
             .send({ email: 'mochatest@mochatest.fave', password: 'mochatestpassword' })
             .expect('Content-Type', /json/)
             .expect(200)
-            .end((err, res) => {
-                if (err) {
-                    console.log(res.error.text);
-                }
+            .then((res) => {
+                // try to access restricted page
+                token = res.body.session;
+                request(app).get('/api/users')
+                    .set('Content-Type', 'application/json')
+                    .set('x-auth-token', token)
+                    .expect(200)
+                    .end((err, res2) => {
+                        if (err) {
+                            console.log(res2.error.text);
+                        }
+
+                        if (res2.body.user.email !== 'mochatest@mochatest.fave') {
+                            err = new Error('User email does not match the one which should.');
+                        }
+
+                        done(err);
+                    });
+            }).catch((err) => {
+                console.log(err);
                 done(err);
             });
     });
@@ -119,5 +136,17 @@ describe('App', () => {
             });
     });
 
-    
+    it('Auth test (get user data without being logged in)', (done : Function) => {
+        request(app).get('/api/users')
+            .set('Content-Type', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(401)
+            .end((err, res) => {
+                if (err) {
+                    console.log(res.error.text);
+                }
+                done(err);
+            });
+    });
+     
 });

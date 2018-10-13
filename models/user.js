@@ -98,6 +98,21 @@ class User extends Sequelize.Model {
     checkPassword(password : string) : Promise<boolean> {
         return bcrypt.compare(password, this.passHash);
     }
+
+    // example function to test auth
+    getPublicData() : Object {
+        let ret = {};
+        ret.email = this.email;
+        ret.username = this.username;
+        ret.firstName = this.firstName;
+        ret.lastName = this.lastName;
+        ret.birthday = this.birthday;
+        ret.preferredCurrency = this.preferredCurrency;
+        /**
+            And whatever needs to be taken
+         */
+        return ret;
+    }
 }
 
 export default User;
