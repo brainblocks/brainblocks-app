@@ -13,6 +13,10 @@ export default  {
                 type:      Sequelize.INTEGER,
                 allowNull: false
             },
+            UUID: {
+                type:      Sequelize.UUID,
+                allowNull: false
+            },
             type: {
                 type:      Sequelize.STRING,
                 allowNull: false

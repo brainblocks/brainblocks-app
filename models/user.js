@@ -94,6 +94,10 @@ class User extends Sequelize.Model {
             type:    'auth'
         });
     }
+
+    checkPassword(password : string) : Promise<boolean> {
+        return bcrypt.compare(password, this.passHash);
+    }
 }
 
 export default User;

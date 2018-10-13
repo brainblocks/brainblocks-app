@@ -62,4 +62,62 @@ describe('App', () => {
                 });
         });
     });
+
+    it('Login test (username)', (done : Function) => {
+        request(app).post('/api/users/login')
+            .set('Content-Type', 'application/json')
+            .send({ username: 'mochatest_login', password: 'mochatestpassword' })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                if (err) {
+                    console.log(res.error.text);
+                }
+                done(err);
+            });
+    });
+
+    it('Login test (email)', (done : Function) => {
+        request(app).post('/api/users/login')
+            .set('Content-Type', 'application/json')
+            .send({ email: 'mochatest@mochatest.fave', password: 'mochatestpassword' })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                if (err) {
+                    console.log(res.error.text);
+                }
+                done(err);
+            });
+    });
+
+    it('Login test (invalid credentials)', (done : Function) => {
+        request(app).post('/api/users/login')
+            .set('Content-Type', 'application/json')
+            .send({ email: 'mochatest@mochatest.fave', password: 'invalid password here' })
+            .expect('Content-Type', /json/)
+            .expect(400)
+            .end((err, res) => {
+                if (err) {
+                    console.log(res.error.text);
+                }
+                done(err);
+            });
+    });
+
+    it('Login test (unexisting user)', (done : Function) => {
+        request(app).post('/api/users/login')
+            .set('Content-Type', 'application/json')
+            .send({ email: 'unexisting@mochatest.fave', password: 'invalid password here' })
+            .expect('Content-Type', /json/)
+            .expect(400)
+            .end((err, res) => {
+                if (err) {
+                    console.log(res.error.text);
+                }
+                done(err);
+            });
+    });
+
+    
 });

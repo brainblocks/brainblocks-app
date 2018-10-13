@@ -9,6 +9,7 @@ class UserToken extends Sequelize.Model {
         return super.init(
             {
                 userId:  DataTypes.INTEGER,
+                UUID:    DataTypes.UUID,
                 type:    DataTypes.STRING,
                 expires: DataTypes.DATE
             },
@@ -28,25 +29,41 @@ class UserToken extends Sequelize.Model {
         this.user = this.belongsTo(models.User, { as: 'User', foreignKey: 'userId' });
     }
 
-    static beforeCreate(token : self) {
-        if (!token.expires) {
-            token.expires = new Date(Date.now() + (30 * 24 * 3600 * 1000)); // 30 days ahead
-        }
+    static beforeCreate(token : self) : Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (!token.expires) {
+                token.expires = new Date(Date.now() + (30 * 24 * 3600 * 1000)); // 30 days ahead
+            }
+
+            if (!token.UUID) {
+                User.findOne({ where: {
+                    id: token.userId
+                } }).then((user) => {
+                    token.UUID = user.UUID;
+                    resolve();
+                }).catch((err) => {
+                    reject(err);
+                });
+            } else {
+                resolve();
+            }
+        });
     }
 
     static afterCreate(token : self) {
-        User.findOne({ where: {
-            id: token.userId
-        } }).then((user) => {
-            token.token = jwt.sign({
-                id:      token.id,
-                uuid:    user.UUID,
-                type:    token.type,
-                expires: token.expires
-            }, process.env.JWT_KEY).toString();
-        }).catch((err) => {
-            throw new Error(err);
-        });
+        token.getJWT();
+    }
+
+    getJWT() : jwt {
+        if (!this.token) {
+            this.token = jwt.sign({
+                id:      this.id,
+                uuid:    this.UUID,
+                type:    this.type,
+                expires: this.expires
+            }, process.env.JWT_KEY);
+        }
+        return this.token;
     }
 }
 

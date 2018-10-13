@@ -1,37 +1,19 @@
 /* @flow */
-
-import validator from 'email-validator';
-import passwordValidator from 'password-validator';
 import { Op } from 'sequelize';
 
+import { checkPassword } from '../middleware/validator';
 import models from '../models';
 
 const User = models.models.User;
+const UserToken = models.models.UserToken;
 
 let exp = {};
 
 exp.create = (req : Object, res : Object) => {
-    // check if email is correct
-    if (!validator.validate(req.body.email)) {
-        return res.status(400).send({ error: 'Invalid email address' });
+    // check if password is strong enough
+    if (!checkPassword(req.body.password)) {
+        return res.status(400).send({ error: 'Password should be at least 6 characters long and contain uppercase, lowercase and digits' });
     }
-
-    // check password strength
-    let schema = new passwordValidator();
-    schema.is().min(8)
-        .has().uppercase()
-        .has().lowercase()
-        .has().digits();
-
-    if (!schema.validate(req.body.password)) {
-        return res.status(400).send({ error: 'Password should contain numbers, lowercase and uppercase letters.' });
-    }
-
-    // check username
-    if (!(/^[a-z0-9]{6,16}$/i).test(req.body.username)) {
-        return res.status(400).send({ error: 'Invalid username' });
-    }
-
     // check if username or email are taken
     User.findOne({ where: {
         [Op.or]: [ { email: req.body.email }, { username: req.body.username } ]
@@ -49,7 +31,7 @@ exp.create = (req : Object, res : Object) => {
             user.generateAuthToken().then((token) => {
                 return res.send({
                     status:       'success',
-                    sessionToken: token,
+                    sessionToken: token.toString(),
                     username:     user.username,
                     email:        user.email
                 });
@@ -61,6 +43,56 @@ exp.create = (req : Object, res : Object) => {
     }).catch(() => {
         return res.status(500).send({ error: 'There was an error processing your request' });
     });
+};
+
+exp.login = (req : Object, res : Object) => {
+
+    let searchBy = {};
+    if (req.body.username) {
+        searchBy = { username: req.body.username };
+    } else if (req.body.email) {
+        searchBy = { email: req.body.email };
+    } else {
+        return res.status(400).send({ error: 'Malformed request.' });
+    }
+
+    User.findOne({ where: searchBy })
+        .then((user) => {
+            if (user) {
+                // check password
+                user.checkPassword(req.body.password).then((check) => {
+                    if (!check) {
+                        return res.status(400).send({ error: 'Invalid credentials' });
+                    }
+
+                    return UserToken.findOne({
+                        where: {
+                            userId:  user.id,
+                            expires: {
+                                [Op.gt]: new Date(Date.now())
+                            }
+                        }
+                    }).then(async (token) => {
+                        if (!token) {
+                            token = await user.generateAuthToken();
+                        }
+
+                        res.status(200).send({
+                            status:   'success',
+                            username: user.username,
+                            email:    user.email,
+                            session:  token.getJWT().toString(),
+                            expires:  token.expires
+                        });
+                    });
+
+                });
+            } else {
+                // user not found
+                return res.status(400).send({ error: 'Invalid credentials' });
+            }
+        });
+    
 };
 
 export default exp;
