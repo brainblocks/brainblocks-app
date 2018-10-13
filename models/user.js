@@ -79,12 +79,21 @@ class User extends Sequelize.Model {
         }
 
         if (decoded.expires < Date.now()) {
-            Promise.reject(new Error('Expired token'));
+            return Promise.reject(new Error('Expired token'));
         }
 
-        return User.findOne({ where: {
+        return UserToken.findOne({ where: {
+            id:   decoded.id,
             UUID: decoded.uuid
-        } });
+        } }).then((found) => {
+            if (!found) {
+                return Promise.reject(new Error('Expired token'));
+            }
+
+            return User.findOne({ where: {
+                UUID: decoded.uuid
+            } });
+        });
     }
 
     generateAuthToken(expires : Date) : Promise<string> {

@@ -54,6 +54,20 @@ class UserToken extends Sequelize.Model {
         token.getJWT();
     }
 
+    static fromRawToken(token : string) : Promise<UserToken> {
+        let decoded;
+
+        try {
+            decoded = jwt.verify(token, process.env.JWT_KEY);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+
+        return UserToken.findOne({ where: {
+            id: decoded.id
+        } });
+    }
+
     getJWT() : jwt {
         if (!this.token) {
             this.token = jwt.sign({

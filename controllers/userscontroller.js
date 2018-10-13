@@ -95,6 +95,22 @@ exp.login = (req : Object, res : Object) => {
     
 };
 
+exp.signOut = (req : Object, res : Object) => {
+    // delete auth token
+    UserToken.fromRawToken(req.token)
+        .then((token) => {
+            if (token) {
+                token.destroy();
+                return res.status(200).send({ status: 'success' });
+            }
+
+            return res.status(400).send({ error: 'Token not found' });
+        }).catch((err) => {
+            console.error(err);
+            return res.status(500).send({ error: 'There was an error when trying to process your request' });
+        });
+};
+
 exp.getUser = (req : Object, res : Object) => {
     return res.status(200).send({ user: req.user.getPublicData(), status: 'success' });
 };

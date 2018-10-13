@@ -63,90 +63,100 @@ describe('App', () => {
         });
     });
 
-    it('Login test (username)', (done : Function) => {
-        request(app).post('/api/users/login')
-            .set('Content-Type', 'application/json')
-            .send({ username: 'mochatest_login', password: 'mochatestpassword' })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err, res) => {
-                if (err) {
-                    console.log(res.error.text);
-                }
-                done(err);
-            });
-    });
+    // $FlowFixMe
+    describe('Session tests', () => {
+        let sessionToken;
+        before((done : Function) => {
+            // login and keep session token for next tests
+            request(app).post('/api/users/login')
+                .set('Content-Type', 'application/json')
+                .send({ username: 'mochatest_sout', password: 'mochatestpassword' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    sessionToken = res.body.session;
+                    done(err);
+                });
+        });
 
-    it('Login test (email)', (done : Function) => {
-        let token;
-        request(app).post('/api/users/login')
-            .set('Content-Type', 'application/json')
-            .send({ email: 'mochatest@mochatest.fave', password: 'mochatestpassword' })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .then((res) => {
-                // try to access restricted page
-                token = res.body.session;
-                request(app).get('/api/users')
-                    .set('Content-Type', 'application/json')
-                    .set('x-auth-token', token)
-                    .expect(200)
-                    .end((err, res2) => {
-                        if (err) {
-                            console.log(res2.error.text);
-                        }
+        it('Login test (email)', (done : Function) => {
+            request(app).post('/api/users/login')
+                .set('Content-Type', 'application/json')
+                .send({ email: 'mochatest@mochatest.fave', password: 'mochatestpassword' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    done(err);
+                });
+        });
 
-                        if (res2.body.user.email !== 'mochatest@mochatest.fave') {
-                            err = new Error('User email does not match the one which should.');
-                        }
+        it('Login test (invalid credentials)', (done : Function) => {
+            request(app).post('/api/users/login')
+                .set('Content-Type', 'application/json')
+                .send({ email: 'mochatest@mochatest.fave', password: 'invalid password here' })
+                .expect('Content-Type', /json/)
+                .expect(400)
+                .end((err, res) => {
+                    if (err) {
+                        console.log(res.error.text);
+                    }
+                    done(err);
+                });
+        });
 
+        it('Login test (unexisting user)', (done : Function) => {
+            request(app).post('/api/users/login')
+                .set('Content-Type', 'application/json')
+                .send({ email: 'unexisting@mochatest.fave', password: 'invalid password here' })
+                .expect('Content-Type', /json/)
+                .expect(400)
+                .end((err, res) => {
+                    if (err) {
+                        console.log(res.error.text);
+                    }
+                    done(err);
+                });
+        });
+
+        it('Auth test (get user data without being logged in)', (done : Function) => {
+            request(app).get('/api/users')
+                .set('Content-Type', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(401)
+                .end((err, res) => {
+                    if (err) {
+                        console.log(res.error.text);
+                    }
+                    done(err);
+                });
+        });
+
+        it('Sign out test', (done : Function) => {
+            request(app).delete('/api/users/session')
+                .set('x-auth-token', sessionToken)
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .then(() => {
+                    // session has been deleted after this suite, try to access restricted area with it
+                    try {
+                        request(app).get('/api/users')
+                            .set('x-auth-token', sessionToken)
+                            .expect(401)
+                            .end(done);
+                    } catch (err) {
+                        console.error(err);
                         done(err);
-                    });
-            }).catch((err) => {
-                console.log(err);
-                done(err);
-            });
+                    }
+                }).catch((err) => {
+                    console.error(err);
+                    done(err);
+                });
+        });
     });
-
-    it('Login test (invalid credentials)', (done : Function) => {
-        request(app).post('/api/users/login')
-            .set('Content-Type', 'application/json')
-            .send({ email: 'mochatest@mochatest.fave', password: 'invalid password here' })
-            .expect('Content-Type', /json/)
-            .expect(400)
-            .end((err, res) => {
-                if (err) {
-                    console.log(res.error.text);
-                }
-                done(err);
-            });
-    });
-
-    it('Login test (unexisting user)', (done : Function) => {
-        request(app).post('/api/users/login')
-            .set('Content-Type', 'application/json')
-            .send({ email: 'unexisting@mochatest.fave', password: 'invalid password here' })
-            .expect('Content-Type', /json/)
-            .expect(400)
-            .end((err, res) => {
-                if (err) {
-                    console.log(res.error.text);
-                }
-                done(err);
-            });
-    });
-
-    it('Auth test (get user data without being logged in)', (done : Function) => {
-        request(app).get('/api/users')
-            .set('Content-Type', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(401)
-            .end((err, res) => {
-                if (err) {
-                    console.log(res.error.text);
-                }
-                done(err);
-            });
-    });
-     
 });
