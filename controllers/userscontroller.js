@@ -181,4 +181,18 @@ exp.addContact = async (req : Object, res : Object) => {
     });
 };
 
+exp.deleteContact = (req : Object, res : Object) => {
+    Contact.destroy({
+        where: {
+            userId: req.user.id,
+            label:  req.body.label
+        }
+    }).then(() => {
+        return res.status(200).send({ status: 'success' });
+    }).catch((err) => {
+        console.error(err);
+        return res.status(500).send({ error: 'There was an error when trying to process your request.' });
+    });
+};
+
 export default exp;

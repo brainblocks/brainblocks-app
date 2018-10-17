@@ -198,5 +198,23 @@ describe('App', () => {
                     done(err);
                 });
         });
+
+        it('Delete User contact', (done : Function) => {
+            request(app).post('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', sessionToken)
+                .send({ label: 'contactToDelete', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .then(() => {
+                    request(app).delete('/api/users/contacts')
+                        .set('Content-Type', 'application/json')
+                        .set('x-auth-token', sessionToken)
+                        .send({ label: 'contactToDelete' })
+                        .expect('Content-Type', /json/)
+                        .expect(200)
+                        .end(done);
+                });
+        });
     });
 });
