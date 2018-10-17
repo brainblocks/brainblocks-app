@@ -45,6 +45,7 @@ class User extends Sequelize.Model {
         this.vault = this.hasOne(models.Vault, { foreignKey: 'userId' });
         this.globalTransactions = this.hasMany(models.GlobalTransaction, { foreignKey: 'userId' });
         this.tokens = this.hasMany(models.UserToken, { foreignKey: 'userId' });
+        this.contacts = this.hasMany(models.Contact, { foreignKey: 'userId' });
     }
 
     static beforeCreate(user : self) : Promise<void> {

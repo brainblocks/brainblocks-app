@@ -23,6 +23,29 @@ class Contact extends Sequelize.Model {
         );
     }
 
+    // @override
+    get(options : Object) : Object {
+        if (options.plain === true) {
+            let ret = super.get({ plain: true });
+            delete ret.id;
+            delete ret.userId;
+
+            if (ret.BBAccount) {
+                ret.BBAccount = 'Brainblocks User';
+            } else {
+                delete ret.BBAccount;
+            }
+
+            if (ret.BBUser) {
+                ret.BBUser = 'Brainblocks User';
+            } else {
+                delete ret.BBUser;
+            }
+            return ret;
+        }
+        return super.get(options);
+    }
+
     assignAccount(account : Sequelize.Account) {
         this.BBAccount = account.id;
     }

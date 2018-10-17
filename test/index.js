@@ -216,5 +216,35 @@ describe('App', () => {
                         .end(done);
                 });
         });
+
+        function getUserContacts(expressApp : Object, token : string, callback : Function) {
+            request(expressApp).get('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', token)
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    callback(err);
+                });
+        }
+
+        it('List user contacts', (done : Function) => {
+            // create another one
+            request(app).post('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', sessionToken)
+                .send({ label: 'testContact', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    getUserContacts(app, sessionToken, done);
+                });
+        });
     });
 });

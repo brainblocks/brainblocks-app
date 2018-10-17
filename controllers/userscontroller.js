@@ -195,4 +195,19 @@ exp.deleteContact = (req : Object, res : Object) => {
     });
 };
 
+exp.getContacts = (req : Object, res : Object) => {
+    req.user.getContacts().then((contacts) => {
+        let c = [];
+        for (let i in contacts) {
+            if (contacts[i]) {
+                c.push(contacts[i].get({ plain: true }));
+            }
+        }
+        return res.status(200).send(c);
+    }).catch((err) => {
+        console.error(err);
+        return res.status(500).send({ error: 'There was an error when trying to process your request.' });
+    });
+};
+
 export default exp;

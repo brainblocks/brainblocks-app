@@ -13,7 +13,9 @@ router.post('/users/login', validate, UsersController.login);
 
 router.get('/users', authenticate, UsersController.getUser);
 router.delete('/users/session', authenticate, UsersController.signOut);
+
 router.post('/users/contacts', authenticate, validate, UsersController.addContact);
 router.delete('/users/contacts', authenticate, validate, UsersController.deleteContact);
+router.get('/users/contacts', authenticate, UsersController.getContacts);
 
 export default router;
