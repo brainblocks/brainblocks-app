@@ -30,6 +30,7 @@
     "password-validator": "^4.1.1",
     "pg": "^7.5.0",
     "pg-hstore": "^2.3.2",
+    "rai-wallet": "^0.3.3",
     "sequelize": "^4.39.0",
     "sequelize-cli": "^4.1.1",
     "uuid": "^3.3.2",

@@ -5,6 +5,7 @@ import app from '../app';
 import models from '../models';
 
 const User = models.models.User;
+const Contact = models.models.Contact;
 
 // $FlowFixMe
 describe('App', () => {
@@ -155,6 +156,45 @@ describe('App', () => {
                     }
                 }).catch((err) => {
                     console.error(err);
+                    done(err);
+                });
+        });
+    });
+
+    describe('Restricted methods test', () => {
+        let sessionToken;
+        before((done : Function) => {
+            // delete all test contacts
+            User.findOne({ where: { username: 'mochatest_login' } }).then((usr) => {
+                Contact.destroy({ where: { userId: usr.id } });
+            });
+
+            // login and keep session token for next tests
+            request(app).post('/api/users/login')
+                .set('Content-Type', 'application/json')
+                .send({ username: 'mochatest_login', password: 'mochatestpassword' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    sessionToken = res.body.session;
+                    done(err);
+                });
+        });
+
+        it('Create User contact', (done : Function) => {
+            request(app).post('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', sessionToken)
+                .send({ label: 'testContact', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
                     done(err);
                 });
         });

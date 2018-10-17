@@ -6,6 +6,9 @@ import models from '../models';
 
 const User = models.models.User;
 const UserToken = models.models.UserToken;
+const Contact = models.models.Contact;
+const TempAddress = models.models.TempAddress;
+const Account = models.models.Account;
 
 let exp = {};
 
@@ -118,6 +121,64 @@ exp.signOut = (req : Object, res : Object) => {
 
 exp.getUser = (req : Object, res : Object) => {
     return res.status(200).send({ user: req.user.getPublicData(), status: 'success' });
+};
+
+exp.addContact = async (req : Object, res : Object) => {
+    let contact = {
+        userId:    req.user.id,
+        label:     req.body.label,
+        address:   null,
+        BBAccount: null,
+        BBUser:    null
+    };
+
+    // contact can be created by username, username@account or address
+    if (req.body.address) {
+        contact.address = req.body.address;
+        // check if its owned by a BB user
+        let addr = await TempAddress.findOne({ where: { nanoAddress: req.body.address } });
+        if (addr) {
+            contact.BBAccount = addr.accountId;
+            contact.BBUser = addr.userId;
+        }
+    } else if (req.body.username) {
+        let username;
+        let accName;
+        
+        if (req.body.username.indexOf('@') !== -1) {
+            let aux = req.body.username.split('@');
+            accName = aux[1];
+            username = aux[0];
+        }
+
+        let user = await User.findOne({ where: { username } });
+
+        if (!user) {
+            return res.send(400).send({ error: 'User not found' });
+        }
+
+        if (accName) {
+            let acc = await Account.findOne({ where: { userId: user.id, label: accName } });
+            if (acc) {
+                contact.BBAccount = acc.id;
+            } else {
+                return res.status(400).send({ error: 'Account specified does not exist' });
+            }
+        }
+
+        contact.BBUser = user.id;
+        
+    } else {
+        // missing params
+        return res.status(400).send({ error: 'Missing address/username' });
+    }
+
+    Contact.create(contact).then(() => {
+        return res.status(200).send({ status: 'success' });
+    }).catch((err) => {
+        console.error(err);
+        return res.status(500).send({ error: 'There was an error when trying to process your request.' });
+    });
 };
 
 export default exp;
