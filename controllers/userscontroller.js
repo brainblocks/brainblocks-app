@@ -23,11 +23,16 @@ exp.create = (req : Object, res : Object) => {
         }
 
         // create user
-        User.create({
-            username: req.body.username,
-            email:    req.body.email,
-            password: req.body.password
-        }).then((user) => {
+        let create = {
+            username:  req.body.username,
+            email:     req.body.email,
+            password:  req.body.password,
+            firstName: req.body.firstName,
+            lastName:  req.body.lastName,
+            birthday:  req.body.birthday
+        };
+
+        User.create(create).then((user) => {
             user.generateAuthToken().then((token) => {
                 return res.send({
                     status:       'success',

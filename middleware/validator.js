@@ -1,6 +1,6 @@
 /* @flow */
 
-import validator from 'email-validator';
+import validator from 'validator';
 import passwordValidator from 'password-validator';
 
 export function checkUsername(username : string) : boolean {
@@ -18,7 +18,35 @@ export function checkPassword(password : string) : boolean {
 }
 
 export function checkEmail(email : string) : boolean {
-    return validator.validate(email);
+    return validator.isEmail(email);
+}
+
+export function checkNames(name : string) : boolean {
+    // should find a way to minimally validate names
+    // at least just removing special characters
+    // then maybe escaping it too?
+    // https://softwareengineering.stackexchange.com/questions/330512/name-validation-best-practices
+    return name ? true : true;
+}
+
+export function checkDate(date : mixed, beforeThan : ?Date, afterThan : ?Date) : boolean {
+    if (!validator.isInt(date) && validator.toDate(date) === null) {
+        return false; // neither unix or date
+    }
+
+    if (beforeThan) {
+        if (!validator.isBefore(date, beforeThan)) {
+            return false;
+        }
+    }
+
+    if (afterThan) {
+        if (!validator.isAfter(date, afterThan)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 export function validate(req : Object, res : Object, next : Function) : mixed {
@@ -32,6 +60,33 @@ export function validate(req : Object, res : Object, next : Function) : mixed {
         if (!checkEmail(req.body.email)) {
             return res.status(400).send({ error: 'Invalid email address' });
         }
+    }
+
+    if (req.body.firstName) {
+        let toValidate = req.body.firstName;
+        req.body.firstName = validator.escape(req.body.firstName);
+        if (req.body.lastName) {
+            toValidate += req.body.lastName;
+            req.body.lastName = validator.escape(req.body.lastName);
+        } else {
+            req.body.lastName = null;
+        }
+
+        if (!checkNames(toValidate)) {
+            return res.status(400).send({ error: 'Invalid first or last name' });
+        }
+
+    } else {
+        req.body.lastName = null;
+        req.body.firstName = null;
+    }
+
+    if (req.body.birthday) {
+        if (!checkDate(req.body.birthday, new Date(Date.now()))) {
+            return res.status(400).send({ error: 'Invalid birthday date' });
+        }
+    } else {
+        req.body.birthday = null;
     }
 
     next();
