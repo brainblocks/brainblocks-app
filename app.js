@@ -5,6 +5,7 @@ import createError from 'http-errors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
+import cors from "cors";
 
 import indexRouter from './routes/index';
 import apiRouter from './routes/api';
@@ -19,6 +20,12 @@ app.set('view engine', 'jade');
 if (process.env.LOGGING === 'true') {
     app.use(logger('dev'));
 }
+
+// TODO: Update this to reflect production settings as well
+app.use(cors({
+    origin: "http://localhost:3000"
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
