@@ -1,13 +1,10 @@
 /* @flow */
 import express from 'express';
+import apiRouter from "./api";
 
 let router = express.Router();
 
-/* GET home page. */
-router.get('/', (req, res) => {
-    res.render('index', { title: 'Express' });
-});
-
+router.use('/api', apiRouter);
 
 export default router;
 

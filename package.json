@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "babel-node ./bin/www",
+    "dev": "nodemon ./bin/www --exec babel-node",
     "flow": "flow",
     "lint": "eslint controllers/ routes/ migrations/ models/ config/ test/ *.js",
     "test": "npm run lint && npm run flow && LOGGING=false mocha --timeout 5000 --require babel-register --exit test/index.js",
@@ -27,6 +28,7 @@
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.3.0",
     "morgan": "~1.9.0",
+    "nodemon": "^1.18.5",
     "normalize-strings": "^1.1.0",
     "password-validator": "^4.1.1",
     "pg": "^7.5.0",
