@@ -15,7 +15,6 @@ export function authenticate(req : Object, res : Object, next : Function) {
         req.token = token;
         next();
     }).catch((error) => {
-        console.dir(error);
         // unauthorized
         res.status(401).send({ error: 'Invalid or expired session' });
     });
