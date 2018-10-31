@@ -19,18 +19,7 @@ describe('App', () => {
         });
     });
 
-    // tests
     // $FlowFixMe
-    it('Should return a 200 response status. App responds', (done : Function) => {
-        request(app).get('/')
-            .expect(200, (err) => {
-                if (err) {
-                    return done(err);
-                }
-                done();
-            });
-    });
-
     it('Database responds', (done : Function) => {
         User.findOne({ where: {
             username: 'test'

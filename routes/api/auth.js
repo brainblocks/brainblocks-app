@@ -1,6 +1,8 @@
-import express from "express";
-import AuthController from "../../controllers/authcontroller";
-import {authenticate} from "../../middleware/auth";
+/* @flow */
+import express from 'express';
+
+import AuthController from '../../controllers/authcontroller';
+import { authenticate } from '../../middleware/auth';
 import { validate } from '../../middleware/validator';
 
 const router = express.Router();

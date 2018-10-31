@@ -5,7 +5,7 @@ import createError from 'http-errors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import cors from "cors";
+import cors from 'cors';
 
 import router from './routes';
 
@@ -19,9 +19,9 @@ if (process.env.LOGGING === 'true') {
     app.use(logger('dev'));
 }
 
-// TODO: Update this to reflect production settings as well
+// TO DO: Update this to reflect production settings as well
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: 'http://localhost:3000'
 }));
 
 app.use(express.json());
