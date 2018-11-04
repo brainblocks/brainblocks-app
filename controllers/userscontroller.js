@@ -9,111 +9,40 @@ const UserToken = models.models.UserToken;
 
 let exp = {};
 
-exp.create = (req : Object, res : Object) => {
+exp.create = async (req : Object, res : Object) => {
     // check if password is strong enough
     if (!checkPassword(req.body.password)) {
-        return res.status(400).send({ error: 'Password should be at least 6 characters long and contain uppercase, lowercase and digits' });
+        return res.status(400).send({ error: 'Password should be at least 8 characters long and contain uppercase, lowercase and digits' });
     }
+
     // check if username or email are taken
-    User.findOne({ where: {
+    const existingUser = await User.findOne({ where: {
         [Op.or]: [ { email: req.body.email }, { username: req.body.username } ]
-    } }).then((usr) => {
-        if (usr !== null) {
-            return res.status(400).send({ error: 'Username or email already taken' });
-        }
+    } })
 
-        // create user
-        let create = {
-            username:  req.body.username,
-            email:     req.body.email,
-            password:  req.body.password,
-            firstName: req.body.firstName,
-            lastName:  req.body.lastName,
-            birthday:  req.body.birthday
-        };
-
-        User.create(create).then((user) => {
-            user.generateAuthToken().then((token) => {
-                return res.send({
-                    status:       'success',
-                    sessionToken: token.toString(),
-                    username:     user.username,
-                    email:        user.email
-                });
-            }).catch(() => {
-                return res.status(500).send({ error: 'There was an error processing your request' });
-            });
-        });
-
-    }).catch(() => {
-        return res.status(500).send({ error: 'There was an error processing your request' });
-    });
-};
-
-exp.login = (req : Object, res : Object) => {
-
-    let searchBy = {};
-    if (req.body.username) {
-        searchBy = { username: req.body.username };
-    } else if (req.body.email) {
-        searchBy = { email: req.body.email };
-    } else {
-        return res.status(400).send({ error: 'Malformed request.' });
+    if (existingUser !== null) {
+        return res.status(400).send({ error: 'Username or email already taken' });
     }
 
-    User.findOne({ where: searchBy })
-        .then((user) => {
-            if (user) {
-                // check password
-                user.checkPassword(req.body.password).then((check) => {
-                    if (!check) {
-                        return res.status(400).send({ error: 'Invalid credentials' });
-                    }
+    // create user
+    let create = {
+        username:  req.body.username,
+        email:     req.body.email,
+        password:  req.body.password,
+        firstName: req.body.firstName,
+        lastName:  req.body.lastName,
+        birthday:  req.body.birthday
+    };
 
-                    return UserToken.findOne({
-                        where: {
-                            userId:  user.id,
-                            expires: {
-                                [Op.gt]: new Date(Date.now())
-                            }
-                        }
-                    }).then(async (token) => {
-                        if (!token) {
-                            token = await user.generateAuthToken();
-                        }
+    const user = await User.create(create);
+    const token = await user.generateAuthToken();
 
-                        res.status(200).send({
-                            status:   'success',
-                            username: user.username,
-                            email:    user.email,
-                            session:  token.getJWT().toString(),
-                            expires:  token.expires
-                        });
-                    });
-
-                });
-            } else {
-                // user not found
-                return res.status(400).send({ error: 'Invalid credentials' });
-            }
-        });
-    
-};
-
-exp.signOut = (req : Object, res : Object) => {
-    // delete auth token
-    UserToken.fromRawToken(req.token)
-        .then((token) => {
-            if (token) {
-                token.destroy();
-                return res.status(200).send({ status: 'success' });
-            }
-
-            return res.status(400).send({ error: 'Token not found' });
-        }).catch((err) => {
-            console.error(err);
-            return res.status(500).send({ error: 'There was an error when trying to process your request' });
-        });
+    res.status(200).send({
+        status:  'success',
+        token:   token.getJWT().toString(),
+        expires: token.expires,
+        user:    user.getPublicData()
+    });
 };
 
 exp.getUser = (req : Object, res : Object) => {

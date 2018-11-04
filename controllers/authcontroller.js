@@ -9,7 +9,7 @@ export default class {
     // Checks the headers for an x-auth-token and return sthe validate session + user data if one is found
     // Returns a 401 if no auth token is set, is invalid, or is expired
     // Depends on the authentication middleware
-    static async fetch(req : Object, res : Object) : Object {
+    static async fetch(req : Object, res : Object) {
         const { user, token } = req;
 
         if (!user || !token) {
@@ -44,7 +44,7 @@ export default class {
     // Attempts to create a new session given username/email and password + twoFactorAuth
     // returns a 400 if the credentials are invalid
     // Will return the existing session information and the users public information if verified
-    static async login(req : Object, res : Object) : Object {
+    static async login(req : Object, res : Object) {
         const { password, username, email } = req.body;
         let searchBy;
 
@@ -99,7 +99,7 @@ export default class {
 
     // Attempts to destroy the existing session. Acts as a logout
     // Returns a 400 if the session is invalid
-    static async logout(req : Object, res : Object) : Object {
+    static async logout(req : Object, res : Object) {
         const userToken = await UserToken.fromRawToken(req.token);
 
         if (!userToken) {
