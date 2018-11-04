@@ -71,7 +71,7 @@ export default class {
         const check = await user.checkPassword(password);
 
         if (!check) {
-            return res.state(400).send({
+            return res.status(400).send({
                 error: 'Invalid credentials'
             });
         }
