@@ -11,7 +11,11 @@ npm install
 cp .env-example .env
 ```
 
-Then edit the DB settings at `.env` and:
+Next, grab a copy of the Postgresql app (for Mac users) [here](https://postgresapp.com/downloads.html). For other OS-es, you can find distributions [here](https://www.postgresql.org/download/).
+
+Following which, edit the database settings in `.env`. You should update the username and password to be your Postgresql username and password. If you downloaded the Mac app above, your default username is your login username and password is blank.
+
+Once done, run these commands:
 
 ```
 npm run sequelize db:create
