@@ -5,7 +5,6 @@ import { checkPassword } from '../middleware/validator';
 import models from '../models';
 
 const User = models.models.User;
-const UserToken = models.models.UserToken;
 
 let exp = {};
 
@@ -18,7 +17,7 @@ exp.create = async (req : Object, res : Object) => {
     // check if username or email are taken
     const existingUser = await User.findOne({ where: {
         [Op.or]: [ { email: req.body.email }, { username: req.body.username } ]
-    } })
+    } });
 
     if (existingUser !== null) {
         return res.status(400).send({ error: 'Username or email already taken' });
