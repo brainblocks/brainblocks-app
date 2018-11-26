@@ -138,4 +138,46 @@ exp.getContacts = (req : Object, res : Object) => {
     });
 };
 
+
+exp.updateContact = (req : Object, res : Object) => {
+
+    if (!req.params.contactId) {
+        return res.status(401).send({ error: 'Missing contact id' });
+    }
+    // can only update nano address and label
+    if (!req.body.label && !req.body.nanoAddress) {
+        return res.status(401).send({ error: 'Invalid parameters' });
+    }
+    let values = {
+        label:   req.body.label,
+        address: req.body.nanoAddress
+    };
+
+    if (values.label === undefined) {
+        delete values.label;
+    }
+
+    if (values.address === undefined) {
+        delete values.address;
+    }
+
+    let options = {
+        limit: 1,
+        where: {
+            userId: req.user.id,
+            id:     req.params.contactId
+        }
+    };
+
+    Contact.update(values, options).then((count) => {
+        if (count[0] === 0) {
+            return res.status(401).send({ error: 'Contact not found' });
+        }
+        return res.status(200).send({ status: 'Success' });
+    }).catch((err) => {
+        console.error(err);
+        return res.status(500).send({ error: 'There was an error processing your request' });
+    });
+};
+
 export default exp;

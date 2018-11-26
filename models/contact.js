@@ -25,9 +25,8 @@ class Contact extends Sequelize.Model {
 
     // @override
     get(options : Object) : Object {
-        if (options.plain === true) {
+        if (options && options.plain === true) {
             let ret = super.get({ plain: true });
-            delete ret.id;
             delete ret.userId;
 
             if (ret.BBAccount) {
