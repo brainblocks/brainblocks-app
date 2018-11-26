@@ -101,8 +101,8 @@ exp.addContact = async (req : Object, res : Object) => {
         return res.status(400).send({ error: 'Missing address/username' });
     }
 
-    Contact.create(contact).then(() => {
-        return res.status(200).send({ status: 'success' });
+    Contact.create(contact).then((ctc) => {
+        return res.status(200).send({ status: 'success', contact: ctc.get({ plain: true }) });
     }).catch((err) => {
         console.error(err);
         return res.status(500).send({ error: 'There was an error when trying to process your request.' });
@@ -113,9 +113,12 @@ exp.deleteContact = (req : Object, res : Object) => {
     Contact.destroy({
         where: {
             userId: req.user.id,
-            label:  req.body.label
+            id:     req.params.contactId
         }
-    }).then(() => {
+    }).then((count) => {
+        if (count === 0) {
+            return res.status(401).send({ error: 'Contact not found' });
+        }
         return res.status(200).send({ status: 'success' });
     }).catch((err) => {
         console.error(err);

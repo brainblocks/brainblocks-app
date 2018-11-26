@@ -189,17 +189,16 @@ describe('App', () => {
         });
 
         it('Delete User contact', (done : Function) => {
-            request(app).post('/api/users/contacts')
+            request(app).post('/api/users/contacts/')
                 .set('Content-Type', 'application/json')
                 .set('x-auth-token', sessionToken)
                 .send({ label: 'contactToDelete', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
                 .expect('Content-Type', /json/)
                 .expect(200)
-                .then(() => {
-                    request(app).delete('/api/users/contacts')
+                .then((res) => {
+                    request(app).delete(`/api/users/contacts/${ JSON.parse(res.res.text).contact.id }`)
                         .set('Content-Type', 'application/json')
                         .set('x-auth-token', sessionToken)
-                        .send({ label: 'contactToDelete' })
                         .expect('Content-Type', /json/)
                         .expect(200)
                         .end(done);
@@ -225,7 +224,7 @@ describe('App', () => {
             request(app).post('/api/users/contacts')
                 .set('Content-Type', 'application/json')
                 .set('x-auth-token', sessionToken)
-                .send({ label: 'testContact', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .send({ label: 'testContact2', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, res) => {

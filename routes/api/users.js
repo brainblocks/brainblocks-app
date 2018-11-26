@@ -12,7 +12,7 @@ router.get('/', authenticate, UsersController.getUser);
 
 router.get('/contacts', authenticate, UsersController.getContacts);
 router.post('/contacts', authenticate, validate, UsersController.addContact);
-router.delete('/contacts', authenticate, validate, UsersController.deleteContact);
+router.delete('/contacts/:contactId', authenticate, validate, UsersController.deleteContact);
 router.patch('/contacts/:contactId', authenticate, validate, UsersController.updateContact);
 
 export default router;

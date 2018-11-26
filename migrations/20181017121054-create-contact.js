@@ -37,7 +37,10 @@ export default  {
                 allowNull: false,
                 type:      Sequelize.DATE
             }
-        });
+        }).then(() => queryInterface.addIndex('Contacts', {
+            unique: true,
+            fields: [ 'label', 'userId' ]
+        }));
     },
     down: (queryInterface : Object) => {
         return queryInterface.dropTable('Contacts');
