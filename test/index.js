@@ -20,18 +20,7 @@ describe('App', () => {
         });
     });
 
-    // tests
     // $FlowFixMe
-    it('Should return a 200 response status. App responds', (done : Function) => {
-        request(app).get('/')
-            .expect(200, (err) => {
-                if (err) {
-                    return done(err);
-                }
-                done();
-            });
-    });
-
     it('Database responds', (done : Function) => {
         User.findOne({ where: {
             username: 'test'
@@ -69,7 +58,7 @@ describe('App', () => {
         let sessionToken;
         before((done : Function) => {
             // login and keep session token for next tests
-            request(app).post('/api/users/login')
+            request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
                 .send({ username: 'mochatest_sout', password: 'mochatestpassword' })
                 .expect('Content-Type', /json/)
@@ -78,13 +67,13 @@ describe('App', () => {
                     if (err) {
                         console.error(res.error.text);
                     }
-                    sessionToken = res.body.session;
+                    sessionToken = res.body.token;
                     done(err);
                 });
         });
 
         it('Login test (email)', (done : Function) => {
-            request(app).post('/api/users/login')
+            request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
                 .send({ email: 'mochatest@mochatest.fave', password: 'mochatestpassword' })
                 .expect('Content-Type', /json/)
@@ -98,7 +87,7 @@ describe('App', () => {
         });
 
         it('Login test (invalid credentials)', (done : Function) => {
-            request(app).post('/api/users/login')
+            request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
                 .send({ email: 'mochatest@mochatest.fave', password: 'invalid password here' })
                 .expect('Content-Type', /json/)
@@ -112,7 +101,7 @@ describe('App', () => {
         });
 
         it('Login test (unexisting user)', (done : Function) => {
-            request(app).post('/api/users/login')
+            request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
                 .send({ email: 'unexisting@mochatest.fave', password: 'invalid password here' })
                 .expect('Content-Type', /json/)
@@ -139,7 +128,7 @@ describe('App', () => {
         });
 
         it('Sign out test', (done : Function) => {
-            request(app).delete('/api/users/session')
+            request(app).delete('/api/auth')
                 .set('x-auth-token', sessionToken)
                 .expect('Content-Type', /json/)
                 .expect(200)
@@ -170,7 +159,7 @@ describe('App', () => {
             });
 
             // login and keep session token for next tests
-            request(app).post('/api/users/login')
+            request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
                 .send({ username: 'mochatest_login', password: 'mochatestpassword' })
                 .expect('Content-Type', /json/)
@@ -179,7 +168,7 @@ describe('App', () => {
                     if (err) {
                         console.error(res.error.text);
                     }
-                    sessionToken = res.body.session;
+                    sessionToken = res.body.token;
                     done(err);
                 });
         });

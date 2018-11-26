@@ -5,12 +5,11 @@ import createError from 'http-errors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
+import cors from 'cors';
 
-import indexRouter from './routes/index';
-import apiRouter from './routes/api';
+import router from './routes';
 
 let app = express();
-let router = express.Router();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,16 +18,18 @@ app.set('view engine', 'jade');
 if (process.env.LOGGING === 'true') {
     app.use(logger('dev'));
 }
+
+// TO DO: Update this to reflect production settings as well
+app.use(cors({
+    origin: 'http://localhost:3000'
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-router.use('/api', apiRouter);
-router.use('/', indexRouter);
-
 app.use('/', router);
-
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
