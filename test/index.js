@@ -5,6 +5,7 @@ import app from '../app';
 import models from '../models';
 
 const User = models.models.User;
+const Contact = models.models.Contact;
 
 // $FlowFixMe
 describe('App', () => {
@@ -145,6 +146,92 @@ describe('App', () => {
                 }).catch((err) => {
                     console.error(err);
                     done(err);
+                });
+        });
+    });
+
+    describe('Restricted methods test', () => {
+        let sessionToken;
+        before((done : Function) => {
+            // delete all test contacts
+            User.findOne({ where: { username: 'mochatest_login' } }).then((usr) => {
+                Contact.destroy({ where: { userId: usr.id } });
+            });
+
+            // login and keep session token for next tests
+            request(app).post('/api/auth')
+                .set('Content-Type', 'application/json')
+                .send({ username: 'mochatest_login', password: 'mochatestpassword' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    sessionToken = res.body.token;
+                    done(err);
+                });
+        });
+
+        it('Create User contact', (done : Function) => {
+            request(app).post('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', sessionToken)
+                .send({ label: 'testContact', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    done(err);
+                });
+        });
+
+        it('Delete User contact', (done : Function) => {
+            request(app).post('/api/users/contacts/')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', sessionToken)
+                .send({ label: 'contactToDelete', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .then((res) => {
+                    request(app).delete(`/api/users/contacts/${ JSON.parse(res.res.text).contact.id }`)
+                        .set('Content-Type', 'application/json')
+                        .set('x-auth-token', sessionToken)
+                        .expect('Content-Type', /json/)
+                        .expect(200)
+                        .end(done);
+                });
+        });
+
+        function getUserContacts(expressApp : Object, token : string, callback : Function) {
+            request(expressApp).get('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', token)
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    callback(err);
+                });
+        }
+
+        it('List user contacts', (done : Function) => {
+            // create another one
+            request(app).post('/api/users/contacts')
+                .set('Content-Type', 'application/json')
+                .set('x-auth-token', sessionToken)
+                .send({ label: 'testContact2', address: 'xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh' })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        console.error(res.error.text);
+                    }
+                    getUserContacts(app, sessionToken, done);
                 });
         });
     });

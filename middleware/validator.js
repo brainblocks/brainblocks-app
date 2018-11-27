@@ -2,8 +2,16 @@
 
 import validator from 'validator';
 import passwordValidator from 'password-validator';
+import { RaiFunctions } from 'rai-wallet';
+
+export function checkLabel(label : string) : boolean {
+    return (/^[a-z0-9_ ]{1,16}$/i).test(label);
+}
 
 export function checkUsername(username : string) : boolean {
+    if (username.indexOf('@') !== -1) {
+        return (/^[a-z0-9_]{6,16}$/i).test(username.split('@')[0]) && checkLabel(username.split('@')[1]);
+    }
     return (/^[a-z0-9_]{6,16}$/i).test(username);
 }
 
@@ -87,6 +95,18 @@ export function validate(req : Object, res : Object, next : Function) : mixed {
         }
     } else {
         req.body.birthday = null;
+    }
+
+    if (req.body.label) {
+        if (!checkLabel(req.body.label)) {
+            return res.status(400).send({ error: 'Invalid label name' });
+        }
+    }
+
+    if (req.body.nanoAddress) {
+        if (!RaiFunctions.parseXRBAccount(req.body.nanoAddress)) {
+            return res.status(400).send({ error: 'Invalid Nano address' });
+        }
     }
 
     next();
