@@ -20,6 +20,7 @@ import AuthorizedIp from './authorizedip';
 import LoginLog from './loginlog';
 import PasswordReset from './passwordreset';
 import UserToken from './usertoken';
+import PasswordChange from './passwordchange';
 
 const env = process.env.NODE_ENV || 'development';
 const config = conf[env];
@@ -47,7 +48,8 @@ const models = {
     AuthorizedIp:          AuthorizedIp.init(sequelize, Sequelize),
     LoginLog:              LoginLog.init(sequelize, Sequelize),
     PasswordReset:         PasswordReset.init(sequelize, Sequelize),
-    UserToken:             UserToken.init(sequelize, Sequelize)
+    UserToken:             UserToken.init(sequelize, Sequelize),
+    PasswordChange:        PasswordChange.init(sequelize, Sequelize)
 };
 
 Object.values(models)

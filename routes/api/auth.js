@@ -11,4 +11,6 @@ router.get('/',  authenticate, AuthController.fetch);
 router.post('/',  validate, AuthController.login);
 router.delete('/',  authenticate, AuthController.logout);
 
+router.patch('/password', authenticate, AuthController.changePassword);
+
 export default router;

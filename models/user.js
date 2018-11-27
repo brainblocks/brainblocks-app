@@ -33,7 +33,8 @@ class User extends Sequelize.Model {
                 underscored: false,
                 hooks:       {
                     beforeCreate:  this.beforeCreate,
-                    afterDestroy: this.afterDestroy
+                    afterDestroy: this.afterDestroy,
+                    beforeUpdate: this.beforeUpdate
                 }
             }
         );
@@ -60,6 +61,15 @@ class User extends Sequelize.Model {
                     resolve();
                 });
             }
+        });
+    }
+
+    static beforeUpdate(user : self) : Promise<void> {
+        return new Promise(async (resolve) => {
+            if (user.password) {
+                user.passHash = await bcrypt.hash(user.password, 10);
+            }
+            resolve();
         });
     }
 
