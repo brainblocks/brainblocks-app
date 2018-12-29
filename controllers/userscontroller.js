@@ -3,27 +3,52 @@ import { Op } from 'sequelize';
 
 import { checkPassword } from '../middleware/validator';
 import models from '../models';
+import SuccessResponse from "../responses/success_response";
+import ErrorResponse from "../responses/error_response";
+import Recaptcha from "../services/recaptcha";
 
-const User = models.models.User;
-const Contact = models.models.Contact;
-const TempAddress = models.models.TempAddress;
-const Account = models.models.Account;
-
+const {User, Contest, TempAddress, Account} = models.models;
 let exp = {};
 
 exp.create = async (req : Object, res : Object) => {
+    const error = new ErrorResponse(res);
+    const success = new SuccessResponse(res);
+    const {password, recaptcha, email, username} = req.body || {};
+
+    // Validate all of the inputs
+    if(!email) {
+        return error.badRequest("Email is required");
+    }
+
+    if(!username) {
+        return error.badRequest("Username is required");
+    }
+
+    if(!password) {
+        return error.badRequest("Password is required");
+    }
+
+    if(!recaptcha) {
+        return error.badRequest("Recaptcha is required");
+    }
+
     // check if password is strong enough
-    if (!checkPassword(req.body.password)) {
-        return res.status(400).send({ error: 'Password should be at least 8 characters long and contain uppercase, lowercase and digits' });
+    if (!checkPassword(password)) {
+        return error.badRequest("Password should be at least 8 characters long and contain uppercase, lowercase and digits")
+    }
+
+    // Ensure the recaptcha is valid
+    if(!await Recaptcha.verify(recaptcha)) {
+        return error.forbidden("Invalid Recaptcha");
     }
 
     // check if username or email are taken
     const existingUser = await User.findOne({ where: {
-        [Op.or]: [ { email: req.body.email }, { username: req.body.username } ]
+        [Op.or]: [ { email: email }, { username: username } ]
     } });
 
     if (existingUser !== null) {
-        return res.status(400).send({ error: 'Username or email already taken' });
+        return error.badRequest("Username or email already taken");
     }
 
     // create user
@@ -39,7 +64,7 @@ exp.create = async (req : Object, res : Object) => {
     const user = await User.create(create);
     const token = await user.generateAuthToken();
 
-    res.status(200).send({
+    return success.send({
         status:  'success',
         token:   token.getJWT().toString(),
         expires: token.expires,
