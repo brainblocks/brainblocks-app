@@ -13,10 +13,12 @@ export default class {
     // Returns a 401 if no auth token is set, is invalid, or is expired
     // Depends on the authentication middleware
     static async fetch(req : Object, res : Object) : Object {
+        const error = new ErrorResponse(res);
+        const success = new SuccessResponse(res);
         const { user, token } = req;
 
         if (!user || !token) {
-            return new ErrorResponse(res).unauthorized('Invalid or expired session')
+            return error.unauthorized('Invalid or expired session')
         }
 
         let userToken = await UserToken.findOne({
@@ -29,10 +31,10 @@ export default class {
         });
 
         if (!userToken) {
-            return new ErrorResponse(res).unauthorized('Invalid or expired session')
+            return error.unauthorized('Invalid or expired session')
         }
 
-        new SuccessResponse(res).send({
+        return success.send({
             status:  'success',
             user:    user.getPublicData(),
             token:   userToken.getJWT().toString(),
@@ -44,23 +46,25 @@ export default class {
     // returns a 400 if the credentials are invalid
     // Will return the existing session information and the users public information if verified
     static async login(req : Object, res : Object) : Object {
+        const error = new ErrorResponse(res);
+        const success = new SuccessResponse(res);
         const { password, username, email, recaptcha } = req.body;
         let searchBy;
 
         if(!username && !email) {
-            return new ErrorResponse(res).badRequest("Username or email must be provided")
+            return error.badRequest("Username or email must be provided")
         }
 
         if(!password) {
-            return new ErrorResponse(res).badRequest("Password must be provided")
+            return error.badRequest("Password must be provided")
         }
 
         if(!recaptcha) {
-            return new ErrorResponse(res).badRequest("Recaptcha must be provided")
+            return error.badRequest("Recaptcha must be provided")
         }
 
         if(!await Recaptcha.verify(recaptcha)) {
-            return new ErrorResponse(res).forbidden("Invalid Recaptcha")
+            return error.forbidden("Invalid Recaptcha")
         }
 
         if (username) {
@@ -74,13 +78,13 @@ export default class {
         });
 
         if (!user) {
-            return new ErrorResponse(res).forbidden("Invalid Credentials");
+            return error.forbidden("Invalid Credentials");
         }
 
         const check = await user.checkPassword(password);
 
         if (!check) {
-            return new ErrorResponse(res).forbidden("Invalid Credentials");
+            return error.forbidden("Invalid Credentials");
         }
 
         let token = await UserToken.findOne({
@@ -96,7 +100,7 @@ export default class {
             token = await user.generateAuthToken();
         }
 
-        res.status(200).send({
+        return success.send({
             status:  'success',
             user:    user.getPublicData(),
             token:   token.getJWT().toString(),
@@ -107,17 +111,15 @@ export default class {
     // Attempts to destroy the existing session. Acts as a logout
     // Returns a 400 if the session is invalid
     static async logout(req : Object, res : Object) : Object {
+        const error = new ErrorResponse(res);
+        const success = new SuccessResponse(res);
         const userToken = await UserToken.fromRawToken(req.token);
 
         if (!userToken) {
-            return req.status(400).send({
-                error: 'Token not found'
-            });
+            return error.badRequest("Token must be provided")
         }
 
         userToken.destroy();
-        return res.status(200).send({
-            status: 'success'
-        });
+        return success.send("Successfully Logged out");
     }
 }

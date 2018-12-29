@@ -25,6 +25,7 @@ export default class ErrorResponse {
 
 	send(message) {
 		return this.response.status(this.status).send({
+			status: "error",
 			error: message || "An error occurred"
 		})
 	}

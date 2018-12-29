@@ -1,3 +1,5 @@
+import { isString } from "util";
+
 /* @flow */
 export default class SuccessResponse {
 	response;
@@ -7,6 +9,13 @@ export default class SuccessResponse {
 	}
 
 	send(payload = {}) {
+		if(isString(payload)) {
+			payload = {message: payload};
+		}
+
+		payload = Object.assign(payload, {
+			status: "success"
+		})
 		return this.response.status(200).send(payload)
 	}
 }

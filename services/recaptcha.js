@@ -20,7 +20,6 @@ export default class Recaptcha {
 				return false;
 			}
 		} catch(error) {
-			console.dir(error);
 			return false;
 		}
 
