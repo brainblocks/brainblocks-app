@@ -6,7 +6,7 @@ import Recaptcha from "../services/recaptcha";
 
 import db from '../models';
 
-const { User, UserToken, PasswordChange } = db.models;
+const { User, UserToken } = db.models;
 
 export default class {
     // Checks the headers for an x-auth-token and return sthe validate session + user data if one is found
@@ -121,31 +121,5 @@ export default class {
 
         userToken.destroy();
         return success.send("Successfully Logged out");
-    }
-
-    // Attempts to change the user password, should be authenticated
-    // Requires password and newPassword
-    // Returns a 401 if password is incorrect, updates the password if it is correct and returns a 200
-    // Should maybe pass through 2fa too?
-    static async changePassword(req : Object, res : Object) : Object {
-        if (!await req.user.checkPassword(req.body.password)) {
-            return res.status(401).send({ error: 'Incorrect password' });
-        }
-
-        return await db.sequelize.transaction((t : Object) => {
-            let oldHash = req.user.passHash;
-            return req.user.update({ password: req.body.newPassword }, { transaction: t }).then((user) => {
-                return PasswordChange.create({
-                    userId:          user.id,
-                    oldPasswordHash: oldHash,
-                    ip:              req.ip
-                }, { transaction: t });
-            });
-        }).then(() => {
-            return res.status(200).send({ status: 'success' });
-        }).catch((err) => {
-            console.error(err);
-            return res.status(500).send({ error: 'There was an error trying to process your request' });
-        });
     }
 }
