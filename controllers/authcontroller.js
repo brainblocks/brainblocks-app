@@ -1,9 +1,9 @@
 /* @flow */
 import { Op } from 'sequelize';
-import ErrorResponse from "../responses/error_response";
-import SuccessResponse from "../responses/success_response";
-import Recaptcha from "../services/recaptcha";
 
+import ErrorResponse from '../responses/error_response';
+import SuccessResponse from '../responses/success_response';
+import Recaptcha from '../services/recaptcha';
 import db from '../models';
 
 const { User, UserToken } = db.models;
@@ -18,7 +18,7 @@ export default class {
         const { user, token } = req;
 
         if (!user || !token) {
-            return error.unauthorized('Invalid or expired session')
+            return error.unauthorized('Invalid or expired session');
         }
 
         let userToken = await UserToken.findOne({
@@ -31,7 +31,7 @@ export default class {
         });
 
         if (!userToken) {
-            return error.unauthorized('Invalid or expired session')
+            return error.unauthorized('Invalid or expired session');
         }
 
         return success.send({
@@ -39,7 +39,7 @@ export default class {
             user:    user.getPublicData(),
             token:   userToken.getJWT().toString(),
             expires: userToken.expires
-        })
+        });
     }
 
     // Attempts to create a new session given username/email and password + twoFactorAuth
@@ -51,20 +51,20 @@ export default class {
         const { password, username, email, recaptcha } = req.body;
         let searchBy;
 
-        if(!username && !email) {
-            return error.badRequest("Username or email must be provided")
+        if (!username && !email) {
+            return error.badRequest('Username or email must be provided');
         }
 
-        if(!password) {
-            return error.badRequest("Password must be provided")
+        if (!password) {
+            return error.badRequest('Password must be provided');
         }
 
-        if(!recaptcha) {
-            return error.badRequest("Recaptcha must be provided")
+        if (!recaptcha) {
+            return error.badRequest('Recaptcha must be provided');
         }
 
-        if(!await Recaptcha.verify(recaptcha)) {
-            return error.forbidden("Invalid Recaptcha")
+        if (!await Recaptcha.verify(recaptcha)) {
+            return error.forbidden('Invalid Recaptcha');
         }
 
         if (username) {
@@ -78,13 +78,13 @@ export default class {
         });
 
         if (!user) {
-            return error.forbidden("Invalid Credentials");
+            return error.forbidden('Invalid Credentials');
         }
 
         const check = await user.checkPassword(password);
 
         if (!check) {
-            return error.forbidden("Invalid Credentials");
+            return error.forbidden('Invalid Credentials');
         }
 
         let token = await UserToken.findOne({
@@ -116,10 +116,10 @@ export default class {
         const userToken = await UserToken.fromRawToken(req.token);
 
         if (!userToken) {
-            return error.badRequest("Token must be provided")
+            return error.badRequest('Token must be provided');
         }
 
         userToken.destroy();
-        return success.send("Successfully Logged out");
+        return success.send('Successfully Logged out');
     }
 }

@@ -1,5 +1,4 @@
 /* @flow */
-import crypto from 'crypto';
 
 import Sequelize from 'sequelize';
 
