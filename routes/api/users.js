@@ -16,5 +16,7 @@ router.delete('/contacts/:contactId', authenticate, validate, UsersController.de
 router.patch('/contacts/:contactId', authenticate, validate, UsersController.updateContact);
 
 router.patch('/passwords', authenticate, UsersController.changePassword);
+router.post('/passwords/reset', validate, UsersController.forgotPassword);
+router.post('/passwords/reset/:token', UsersController.passwordResetConfirm);
 
 export default router;

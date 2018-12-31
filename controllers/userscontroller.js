@@ -6,8 +6,9 @@ import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
 import Recaptcha from '../services/recaptcha';
+import Email from '../services/email';
 
-const { User, Contact, TempAddress, Account, PasswordChange } = models.models;
+const { User, Contact, TempAddress, Account, PasswordChange, PasswordReset } = models.models;
 
 export default class {
     static async create(req : Object, res : Object) : Object {
@@ -231,6 +232,54 @@ export default class {
         }).catch((err) => {
             console.error(err);
             return res.status(500).send({ error: 'There was an error trying to process your request' });
+        });
+    }
+
+    static async forgotPassword(req : Object, res : Object) : Object {
+        const success = new SuccessResponse(res);
+        let user = await User.findOne({ where: { email: req.body.email } });
+        if (user !== null) {
+            const create = {
+                userId:          user.id,
+                ip:              req.ip,
+                oldPasswordHash: user.passHash
+            };
+            PasswordReset.create(create).then((pr) => {
+                Email.sendPasswordReset(pr, user);
+            });
+        }
+        return success.send('If the email address is registered you should have received an email to reset your password.');
+    }
+
+    static async passwordResetConfirm(req : Object, res : Object) : Object {
+        const success = new SuccessResponse(res);
+        const error = new ErrorResponse(res);
+
+        let pr = await PasswordReset.findOne({ where: {
+            token: req.params.token,
+            reset: false
+        } });
+        if (pr.hasExpired()) {
+            return error.badRequest('Invalid or expired token.');
+        }
+
+        // check if password is strong enough
+        if (!checkPassword(req.body.password)) {
+            return error.badRequest('Password should be at least 8 characters long and contain uppercase, lowercase and digits');
+        }
+
+        User.update({
+            password: req.user.password
+        }, {
+            where: {
+                id: pr.userId
+            }
+        }).then(() => {
+            pr.update({ reset: true });
+            return success.send('Password successfully changed.');
+        }).catch((err) => {
+            console.log(err);
+            return error.send();
         });
     }
 }

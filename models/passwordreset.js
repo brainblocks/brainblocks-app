@@ -34,6 +34,13 @@ class PasswordReset extends Sequelize.Model {
             pr.expires = new Date(Date.now() + (5 * 3600 * 1000)); // 5 hours ahead
         }
     }
+
+    hasExpired() : boolean {
+        if (Date.now() > this.expires) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export default PasswordReset;

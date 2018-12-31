@@ -23,7 +23,8 @@ export default {
             },
             token: {
                 type:      Sequelize.STRING,
-                allowNull: false
+                allowNull: false,
+                unique:    true
             },
             expires: {
                 type:      Sequelize.DATE,
