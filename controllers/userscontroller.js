@@ -28,7 +28,7 @@ export default class {
             return error.badRequest('Password is required');
         }
 
-        if (!recaptcha) {
+        if (!recaptcha && process.env.TESTING !== '1') {
             return error.badRequest('Recaptcha is required');
         }
 

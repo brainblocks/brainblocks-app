@@ -7,7 +7,8 @@
     "dev": "nodemon ./bin/www --exec babel-node",
     "flow": "flow",
     "lint": "eslint controllers/ routes/ migrations/ models/ config/ test/ *.js",
-    "test": "npm run lint && npm run flow && LOGGING=false mocha --timeout 5000 --require babel-register --exit test/index.js",
+    "test": "npm run lint && npm run flow && LOGGING=false TESTING=1 mocha --timeout 5000 --require babel-register --exit test/index.js",
+    "mocha": "LOGGING=false TESTING=1 mocha --timeout 5000 --require babel-register --exit test/index.js",
     "sequelize": "babel-node ./node_modules/.bin/sequelize $*"
   },
   "dependencies": {

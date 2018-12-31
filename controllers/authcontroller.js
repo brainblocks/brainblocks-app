@@ -59,7 +59,7 @@ export default class {
             return error.badRequest('Password must be provided');
         }
 
-        if (!recaptcha) {
+        if (!recaptcha && process.env.TESTING !== '1') {
             return error.badRequest('Recaptcha must be provided');
         }
 
