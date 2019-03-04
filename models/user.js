@@ -3,40 +3,63 @@ import Sequelize from 'sequelize';
 import jwt from 'jsonwebtoken';
 import uuidv4 from 'uuid/v4';
 import bcrypt from 'bcrypt';
+import crypto from "crypto";
+import sendGridMail from "@sendgrid/mail";
 
 import UserToken from './usertoken';
 
-class User extends Sequelize.Model {
+sendGridMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+export default class User extends Sequelize.Model {
 
     tokens = [];
 
     static init (sequelize : Object, DataTypes : Object) : Sequelize.Model {
-        return super.init(
-            {
-                username:          DataTypes.STRING,
-                email:             DataTypes.STRING,
-                password:          DataTypes.VIRTUAL,
-                passHash:          DataTypes.STRING,
-                firstName:         DataTypes.STRING,
-                lastName:          DataTypes.STRING,
-                birthday:          DataTypes.STRING,
-                preferredCurrency: DataTypes.STRING,
-                is2FAEnabled:      DataTypes.BOOLEAN,
-                _2FATypeId:        DataTypes.INTEGER,
-                _2FAKey:           DataTypes.STRING,
-                _2FALastValue:     DataTypes.STRING,
-                UUID:              DataTypes.UUID
+        return super.init({
+            username:          DataTypes.STRING,
+            emailHash:         DataTypes.STRING,
+            emailVerification: DataTypes.STRING,
+            passHash:          DataTypes.STRING,
+            firstName:         DataTypes.STRING,
+            lastName:          DataTypes.STRING,
+            birthday:          DataTypes.STRING,
+            preferredCurrency: DataTypes.STRING,
+            is2FAEnabled:      DataTypes.BOOLEAN,
+            _2FATypeId:        DataTypes.INTEGER,
+            _2FAKey:           DataTypes.STRING,
+            _2FALastValue:     DataTypes.STRING,
+            UUID:              DataTypes.UUID,
+            hasVerifiedEmail: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
             },
-            {
-                sequelize,
-                timestamps:  true,
-                underscored: false,
-                hooks:       {
-                    beforeCreate:  this.beforeCreate,
-                    afterDestroy: this.afterDestroy
+            password: {
+                type: DataTypes.VIRTUAL,
+                get() {
+                    throw new Error("Not allowed to retrieve password, use passHash instead")
+                },
+
+                set(value) {
+                    this.setDataValue('password', value);
+                    this.setDataValue('passHash', bcrypt.hashSync(value, 10));
                 }
+            },
+            email: {
+                type: DataTypes.STRING,
+                set(value) {
+                    this.setDataValue('email', value);
+                    this.setDataValue('emailHash', bcrypt.hashSync(value, 10))
+                }
+            },
+        },{
+            sequelize,
+            timestamps:  true,
+            underscored: false,
+            hooks:       {
+                beforeCreate:  this.beforeCreate,
+                afterDestroy: this.afterDestroy
             }
-        );
+        });
     }
 
     static associate(models : Object) {
@@ -48,20 +71,23 @@ class User extends Sequelize.Model {
         this.contacts = this.hasMany(models.Contact, { foreignKey: 'userId' });
     }
 
-    static beforeCreate(user : self) : Promise<void> {
-        return new Promise((resolve) => {
-            if (!user.UUID) {
-                user.UUID = uuidv4();
-            }
+    static async beforeCreate(user : self) : Promise<void> {
+        if (!user.UUID) {
+            user.UUID = uuidv4();
+        }
 
-            // hash password
-            if (!user.passHash) {
-                return bcrypt.hash(user.password, 10).then((hash) => {
-                    user.passHash = hash;
-                    resolve();
-                });
-            }
-        });
+        // hash the password
+        if (!user.passHash) {
+            user.passHash = await bcrypt.hash(user.password, 10)
+        }
+
+        // hash the email
+        if(!user.emailHash && user.email) {
+            user.emailHash = await bcrypt.hash(user.email, 10)
+        }
+
+        // Email verification token
+        user.emailVerification = crypto.randomBytes(20).toString('hex')
     }
 
     static afterDestroy(user : self) : Promise<void> {
@@ -112,17 +138,31 @@ class User extends Sequelize.Model {
     // example function to test auth
     getPublicData() : Object {
         let ret = {};
+        ret.id = this.UUID;
         ret.email = this.email;
         ret.username = this.username;
         ret.firstName = this.firstName;
         ret.lastName = this.lastName;
         ret.birthday = this.birthday;
         ret.preferredCurrency = this.preferredCurrency;
+        ret.hasVerifiedEmail = !!this.hasVerifiedEmail;
         /**
             And whatever needs to be taken
          */
         return ret;
     }
-}
 
-export default User;
+    // Send a confirmation email to this user, post signup
+    async sendVerificationEmail(): Promise<void> {
+        await sendGridMail.send({
+            to: this.email,
+            from: process.env.SENDGRID_FROM_EMAIL,
+            templateId: process.env.SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID,
+            dynamic_template_data: {
+                domain: process.env.WALLET_DOMAIN,
+                emailHash: encodeURIComponent(this.emailHash),
+                emailVerification: encodeURIComponent(this.emailVerification)
+            }
+        });
+    }
+}

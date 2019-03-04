@@ -64,6 +64,8 @@ exp.create = async (req : Object, res : Object) => {
     const user = await User.create(create);
     const token = await user.generateAuthToken();
 
+    await user.sendVerificationEmail();
+
     return success.send({
         status:  'success',
         token:   token.getJWT().toString(),
@@ -74,6 +76,31 @@ exp.create = async (req : Object, res : Object) => {
 
 exp.getUser = (req : Object, res : Object) => {
     return res.status(200).send({ user: req.user.getPublicData(), status: 'success' });
+};
+
+exp.verifyEmail = async (req: Object, res: Object) => {
+    const success = new SuccessResponse(res);
+    const error = new ErrorResponse(res);
+    const {hash, verification} = req.body || {};
+
+    if(hash !== req.user.emailHash) {
+        return error.badRequest("Could not verify email");
+    }
+
+    if(verification !== req.user.emailVerification) {
+        return error.badRequest("Could not verify email");
+    }
+
+    req.user.hasVerifiedEmail = true;
+    await req.user.save()
+
+    success.send(req.user.getPublicData())
+};
+
+exp.resendVerificationEmail = async (req: Object, res: Object) => {
+    await req.user.sendVerificationEmail()
+
+    new SuccessResponse(res).send(req.user.getPublicData())
 };
 
 exp.addContact = async (req : Object, res : Object) => {
