@@ -9,6 +9,8 @@ let router = express.Router();
 
 router.post('/', validate, UsersController.create);
 router.get('/', authenticate, UsersController.getUser);
+router.post('/rpc/verify-email', authenticate, UsersController.verifyEmail);
+router.post('/rpc/resend-verification-email', authenticate, UsersController.resendVerificationEmail);
 
 router.get('/contacts', authenticate, UsersController.getContacts);
 router.post('/contacts', authenticate, validate, UsersController.addContact);
