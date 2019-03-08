@@ -3,14 +3,13 @@
 import validator from 'validator';
 import passwordValidator from 'password-validator';
 import { RaiFunctions } from 'rai-wallet';
-import { SUPPORTED_CURRENCIES } from '../constants/currencies'
 
 export function checkLabel(label : string) : boolean {
     return (/^[a-z0-9_ ]{1,16}$/i).test(label);
 }
 
 export function checkCurrency(currency : string) : boolean {
-    return SUPPORTED_CURRENCIES.includes(currency);
+    return (/^([a-z]){2,4}$/).test(currency);
 }
 
 export function checkUsername(username : string) : boolean {
