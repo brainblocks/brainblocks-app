@@ -1,14 +1,18 @@
 /* @flow */
+import crypto from 'crypto';
+
 import Sequelize from 'sequelize';
 import jwt from 'jsonwebtoken';
 import uuidv4 from 'uuid/v4';
 import bcrypt from 'bcrypt';
+import authenticator from 'otplib/authenticator';
 import crypto from "crypto";
 import sendGridMail from "@sendgrid/mail";
 
 import UserToken from './usertoken';
 
 sendGridMail.setApiKey(process.env.SENDGRID_API_KEY)
+authenticator.options = { crypto };
 
 export default class User extends Sequelize.Model {
 
@@ -135,7 +139,54 @@ export default class User extends Sequelize.Model {
         return bcrypt.compare(password, this.passHash);
     }
 
-    // example function to test auth
+    // 2FA token challenge
+    check2fa(token2fa : string) : Promise<boolean> {
+        if (authenticator.check(token2fa, this._2FAKey)) {
+            return Promise.resolve(true);
+        } else {
+            return Promise.reject(new Error('2FA is incorrect'));        
+        }
+    }
+
+    // Generate 2FA secret key for user
+    set2fa() : Promise<string> {
+        if (this.is2FAEnabled) {
+            return Promise.reject(new Error('2FA key already set'));
+        } else {
+            const secret = authenticator.generateSecret();
+            return this.update({ _2FAKey: secret });
+        }
+    }
+
+    // Activate 2FA if token challenge is succesful
+    async confirm2fa(token2fa : string) : Promise<string> {
+        if (this.is2FAEnabled) {
+            return Promise.reject(new Error('2FA already activated'));
+        } else {
+            try {
+                await this.check2fa(token2fa);
+                return this.update({ is2FAEnabled: true });
+            } catch (err) {
+                return Promise.reject(new Error('2FA is incorrect'));
+            }
+        }
+    }
+
+    // Deactivate 2FA if token challenge is succesful
+    async deactivate2fa(token2fa : string) : Promise<string> {
+        if (!this.is2FAEnabled) {
+            return Promise.reject(new Error('2FA already deactivated'));
+        } else {
+            try {
+                await this.check2fa(token2fa);
+                return this.update({ is2FAEnabled: false });
+            } catch (err) {
+                return Promise.reject(new Error('2FA is incorrect'));
+            }
+        }
+    }
+
+    // Example function to test auth
     getPublicData() : Object {
         let ret = {};
         ret.id = this.UUID;

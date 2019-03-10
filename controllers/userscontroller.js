@@ -3,52 +3,53 @@ import { Op } from 'sequelize';
 
 import { checkPassword } from '../middleware/validator';
 import models from '../models';
-import SuccessResponse from "../responses/success_response";
-import ErrorResponse from "../responses/error_response";
-import Recaptcha from "../services/recaptcha";
+import SuccessResponse from '../responses/success_response';
+import ErrorResponse from '../responses/error_response';
+import Recaptcha from '../services/recaptcha';
 
-const {User, Contest, TempAddress, Account} = models.models;
+const { User, Contact, TempAddress, Account } = models.models;
 let exp = {};
 
 exp.create = async (req : Object, res : Object) => {
     const error = new ErrorResponse(res);
     const success = new SuccessResponse(res);
-    const {password, recaptcha, email, username} = req.body || {};
+    const { password, recaptcha, email, username } = req.body || {};
 
     // Validate all of the inputs
-    if(!email) {
-        return error.badRequest("Email is required");
+    if (!email) {
+        return error.badRequest('Email is required');
     }
 
-    if(!username) {
-        return error.badRequest("Username is required");
+    if (!username) {
+        return error.badRequest('Username is required');
     }
 
-    if(!password) {
-        return error.badRequest("Password is required");
+    if (!password) {
+        return error.badRequest('Password is required');
     }
 
-    if(!recaptcha) {
-        return error.badRequest("Recaptcha is required");
+    if (!recaptcha) {
+        return error.badRequest('Recaptcha is required');
     }
 
     // check if password is strong enough
     if (!checkPassword(password)) {
-        return error.badRequest("Password should be at least 8 characters long and contain uppercase, lowercase and digits")
+        return error.badRequest('Password should be at least 8 characters long and contain uppercase, lowercase and digits');
     }
 
     // Ensure the recaptcha is valid
-    if(!await Recaptcha.verify(recaptcha)) {
-        return error.forbidden("Invalid Recaptcha");
+    if (!await Recaptcha.verify(recaptcha)) {
+        return error.forbidden('Invalid Recaptcha');
     }
 
     // check if username or email are taken
     const existingUser = await User.findOne({ where: {
+        // eslint-disable-next-line object-shorthand
         [Op.or]: [ { email: email }, { username: username } ]
     } });
 
     if (existingUser !== null) {
-        return error.badRequest("Username or email already taken");
+        return error.badRequest('Username or email already taken');
     }
 
     // create user
@@ -233,6 +234,37 @@ exp.updateContact = (req : Object, res : Object) => {
         console.error(err);
         return res.status(500).send({ error: 'There was an error processing your request' });
     });
+};
+
+
+// Create 2FA key for user
+exp.set2fa = async (req : Object, res : Object) => {
+    try {
+        await req.user.set2fa();
+        new SuccessResponse(res).send(req.user._2FAKey);
+    } catch (err) {
+        new ErrorResponse(res).unauthorized(err.message);
+    }
+};
+
+// Confirm and activate 2FA for user if token challenge is successful
+exp.confirm2fa = async (req : Object, res : Object) => {
+    try {
+        await req.user.confirm2fa(req.body.token2fa);
+        new SuccessResponse(res).send();
+    } catch (err) {
+        new ErrorResponse(res).unauthorized(err.message);
+    }
+};
+
+// Deactivate 2FA (but dont remove key)
+exp.deactivate2fa = async (req : Object, res : Object) => {
+    try {
+        await req.user.deactivate2fa(req.body.token2fa);
+        new SuccessResponse(res).send();
+    } catch (err) {
+        new ErrorResponse(res).unauthorized(err.message);
+    }
 };
 
 export default exp;

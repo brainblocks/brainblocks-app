@@ -17,4 +17,8 @@ router.post('/contacts', authenticate, validate, UsersController.addContact);
 router.delete('/contacts/:contactId', authenticate, validate, UsersController.deleteContact);
 router.patch('/contacts/:contactId', authenticate, validate, UsersController.updateContact);
 
+router.post('/2fa', authenticate, UsersController.set2fa);
+router.post('/2fa/confirm', authenticate, UsersController.confirm2fa);
+router.delete('/2fa/', authenticate, UsersController.deactivate2fa);
+
 export default router;
