@@ -28,13 +28,14 @@ export default class User extends Sequelize.Model {
             lastName:          DataTypes.STRING,
             birthday:          DataTypes.STRING,
             preferredCurrency: DataTypes.STRING,
+            defaultAccount:    DataTypes.STRING,
             is2FAEnabled:      DataTypes.BOOLEAN,
             _2FATypeId:        DataTypes.INTEGER,
             _2FAKey:           DataTypes.STRING,
             _2FALastValue:     DataTypes.STRING,
             UUID:              DataTypes.UUID,
-            hasVerifiedEmail: {
-                type: DataTypes.BOOLEAN,
+            hasVerifiedEmail:  {
+                type:         DataTypes.BOOLEAN,
                 defaultValue: false
             },
             password: {
@@ -196,6 +197,7 @@ export default class User extends Sequelize.Model {
         ret.lastName = this.lastName;
         ret.birthday = this.birthday;
         ret.preferredCurrency = this.preferredCurrency;
+        ret.defaultAccount = this.defaultAccount;
         ret.hasVerifiedEmail = !!this.hasVerifiedEmail;
         /**
             And whatever needs to be taken

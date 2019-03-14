@@ -8,6 +8,10 @@ export function checkLabel(label : string) : boolean {
     return (/^[a-z0-9_ ]{1,16}$/i).test(label);
 }
 
+export function checkCurrency(currency : string) : boolean {
+    return (/^([a-z]){2,4}$/).test(currency);
+}
+
 export function checkUsername(username : string) : boolean {
     if (username.indexOf('@') !== -1) {
         return (/^[a-z0-9_]{6,16}$/i).test(username.split('@')[0]) && checkLabel(username.split('@')[1]);
@@ -27,6 +31,10 @@ export function checkPassword(password : string) : boolean {
 
 export function checkEmail(email : string) : boolean {
     return validator.isEmail(email);
+}
+
+export function checkNanoAddress(addr : string) : boolean {
+    return RaiFunctions.parseXRBAccount(addr)
 }
 
 export function checkNames(name : string) : boolean {
@@ -104,8 +112,14 @@ export function validate(req : Object, res : Object, next : Function) : mixed {
     }
 
     if (req.body.nanoAddress) {
-        if (!RaiFunctions.parseXRBAccount(req.body.nanoAddress)) {
+        if (!checkNanoAddress(req.body.nanoAddress)) {
             return res.status(400).send({ error: 'Invalid Nano address' });
+        }
+    }
+
+    if (req.body.preferredCurrency) {
+        if (!checkCurrency(req.body.preferredCurrency)) {
+            return res.status(400).send({ error: 'Invalid currency' });
         }
     }
 

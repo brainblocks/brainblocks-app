@@ -1,7 +1,7 @@
 /* @flow */
 import { Op } from 'sequelize';
 
-import { checkPassword } from '../middleware/validator';
+import { checkPassword, checkCurrency } from '../middleware/validator';
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
@@ -77,6 +77,38 @@ exp.create = async (req : Object, res : Object) => {
 
 exp.getUser = (req : Object, res : Object) => {
     return res.status(200).send({ user: req.user.getPublicData(), status: 'success' });
+};
+
+exp.update = (req : Object, res : Object) => {
+    // ensure authorization
+    if (!req.user) {
+        return res.status(401).send({ error: 'Not authorized' });
+    }
+
+    // editable fields
+    if (!req.body.preferredCurrency && !req.body.defaultAccount) {
+        return res.status(401).send({ error: 'Invalid parameters' });
+    }
+
+    const options = { fields: [] };
+
+    if (req.body.preferredCurrency) {
+        req.user.preferredCurrency = req.body.preferredCurrency;
+        options.fields.push('preferredCurrency');
+    }
+
+    if (req.body.defaultAccount) {
+        req.user.defaultAccount = req.body.defaultAccount;
+        options.fields.push('defaultAccount');
+    }
+
+    try {
+        req.user.save(options);
+    } catch (err) {
+        console.error('Error updating user', err);
+        return res.status(500).send({ error: 'There was an error processing your request' });
+    }
+    return res.status(200).send({ status: 'Success' });
 };
 
 exp.verifyEmail = async (req: Object, res: Object) => {
