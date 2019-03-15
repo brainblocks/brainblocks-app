@@ -2,7 +2,7 @@
 
 export default {
     up: (queryInterface : Object, Sequelize : Object) => {
-        return queryInterface.createTable('AuthorizedIp', {
+        return queryInterface.createTable('AuthorizedIps', {
             id: {
                 allowNull:     false,
                 autoIncrement: true,
