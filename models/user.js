@@ -6,8 +6,7 @@ import jwt from 'jsonwebtoken';
 import uuidv4 from 'uuid/v4';
 import bcrypt from 'bcrypt';
 import authenticator from 'otplib/authenticator';
-import crypto from "crypto";
-import sendGridMail from "@sendgrid/mail";
+import sendGridMail from '@sendgrid/mail';
 
 import UserToken from './usertoken';
 

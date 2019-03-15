@@ -6,7 +6,7 @@ import SuccessResponse from '../responses/success_response';
 import Recaptcha from '../services/recaptcha';
 import db from '../models';
 
-const { User, UserToken, LoginLog } = db.models;
+const { User, UserToken, LoginLog, AuthorizedIp } = db.models;
 
 export default class {
     // Checks the headers for an x-auth-token and return sthe validate session + user data if one is found
@@ -45,6 +45,7 @@ export default class {
     // Attempts to create a new session given username/email and password + twoFactorAuth
     // returns a 400 if the credentials are invalid
     // Will return the existing session information and the users public information if verified
+    // eslint-disable-next-line complexity
     static async login(req : Object, res : Object) : Object {
         const error = new ErrorResponse(res);
         const success = new SuccessResponse(res);
@@ -103,7 +104,7 @@ export default class {
         loginInfo.userId = user.id;
 
         // Calulate amount of attempts and time since last attempt
-        let lastSuccessId = (await LoginLog.max('id', { where: { 'userId': loginInfo.userId, 'success': true } }));
+        let lastSuccessId = (await LoginLog.max('id', { where: { 'userId': loginInfo.userId, 'success': true } })) || 0;
         loginInfo.attemptCount = (await LoginLog.count({ where: { 'userId': loginInfo.userId, 'success': false, 'id': { [Op.gt]: lastSuccessId } } }) + 1);
         
         let lastAttemptTime = await LoginLog.max('createdAt', { where: { 'userId': loginInfo.userId } });
@@ -116,6 +117,17 @@ export default class {
             return error.forbidden('Too many bad attempts, please wait 5 minutes.');
         }
 
+        // Check if IP authorized
+        const checkIp = await AuthorizedIp.findOne({
+            where: { 'userId': loginInfo.userId, 'ip': loginInfo.ip }
+        });
+
+        // If IP not found
+        if (!checkIp) {
+            loginInfo.failReason = 'IP not authorized';
+            LoginLog.create(loginInfo);
+            return error.forbidden('IP not authorized');
+        }
         // Check password
         const check = await user.checkPassword(password);
 
