@@ -7,12 +7,20 @@ class AuthorizedIp extends Sequelize.Model {
             {
                 userId:      DataTypes.INTEGER,
                 ip:          DataTypes.STRING,
-                validUntil:  DataTypes.DATE
+                authorized:  {
+                    type:         DataTypes.BOOLEAN,
+                    defaultValue: false
+                },
+                validUntil:  DataTypes.DATE,
+                randId:      DataTypes.STRING
             },
             {
                 sequelize,
                 timestamps:  true,
-                underscored: false
+                underscored: false,
+                hooks:       {
+                    beforeCreate:  this.beforeCreate
+                }
             }
         );
     }

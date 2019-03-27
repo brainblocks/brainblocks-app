@@ -7,7 +7,7 @@ import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
 import Recaptcha from '../services/recaptcha';
 
-const { User, Contact, TempAddress, Account } = models.models;
+const { User, Contact, TempAddress, Account, AuthorizedIp } = models.models;
 let exp = {};
 
 exp.create = async (req : Object, res : Object) => {
@@ -28,18 +28,19 @@ exp.create = async (req : Object, res : Object) => {
         return error.badRequest('Password is required');
     }
 
-    if (!recaptcha) {
-        return error.badRequest('Recaptcha is required');
-    }
+    if (process.env.ENFORCE_RECAPTCHA === 'true') {
+        if (!recaptcha) {
+            return error.badRequest('Recaptcha is required');
+        }
+        // Ensure the recaptcha is valid
+        if (!await Recaptcha.verify(recaptcha)) {
+        return error.forbidden('Invalid Recaptcha');
+        }
+    }    
 
     // check if password is strong enough
     if (!checkPassword(password)) {
         return error.badRequest('Password should be at least 8 characters long and contain uppercase, lowercase and digits');
-    }
-
-    // Ensure the recaptcha is valid
-    if (!await Recaptcha.verify(recaptcha)) {
-        return error.forbidden('Invalid Recaptcha');
     }
 
     // check if username or email are taken
@@ -134,6 +135,31 @@ exp.resendVerificationEmail = async (req : Object, res : Object) => {
     await req.user.sendVerificationEmail();
 
     new SuccessResponse(res).send(req.user.getPublicData());
+};
+
+// Authenticate an IP for a user
+exp.verifyIp = async (req : Object, res : Object) => {
+    const success = new SuccessResponse(res);
+    const error = new ErrorResponse(res);
+
+    const { randId } = req.body;
+
+    if (!randId) {
+        return error.badRequest('Id should be provided.');
+    }
+
+    let ipAuth = await AuthorizedIp.findOne({
+        where: { randId, authorized: false }
+    });
+
+    if (!ipAuth) {
+        return error.badRequest('IP is already verified or request not found.');
+    }
+
+    ipAuth.authorized = true;
+    await ipAuth.save();
+
+    success.send('Success.');
 };
 
 exp.addContact = async (req : Object, res : Object) => {
