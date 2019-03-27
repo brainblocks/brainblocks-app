@@ -9,8 +9,9 @@ import authenticator from 'otplib/authenticator';
 import sendGridMail from '@sendgrid/mail';
 
 import UserToken from './usertoken';
+import Vault from './vault';
 
-sendGridMail.setApiKey(process.env.SENDGRID_API_KEY)
+sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
 authenticator.options = { crypto };
 
 export default class User extends Sequelize.Model {
@@ -26,7 +27,10 @@ export default class User extends Sequelize.Model {
             firstName:         DataTypes.STRING,
             lastName:          DataTypes.STRING,
             birthday:          DataTypes.STRING,
-            preferredCurrency: DataTypes.STRING,
+            preferredCurrency: {
+                type:         DataTypes.STRING,
+                defaultValue: 'usd'
+            },
             defaultAccount:    DataTypes.STRING,
             is2FAEnabled:      DataTypes.BOOLEAN,
             _2FATypeId:        DataTypes.INTEGER,
@@ -40,11 +44,12 @@ export default class User extends Sequelize.Model {
             password: {
                 type: DataTypes.VIRTUAL,
                 get() {
-                    throw new Error("Not allowed to retrieve password, use passHash instead")
+                    throw new Error('Not allowed to retrieve password, use passHash instead');
                 },
 
                 set(value) {
                     this.setDataValue('password', value);
+                    // eslint-disable-next-line no-sync
                     this.setDataValue('passHash', bcrypt.hashSync(value, 10));
                 }
             },
@@ -52,10 +57,11 @@ export default class User extends Sequelize.Model {
                 type: DataTypes.STRING,
                 set(value) {
                     this.setDataValue('email', value);
-                    this.setDataValue('emailHash', bcrypt.hashSync(value, 10))
+                    // eslint-disable-next-line no-sync
+                    this.setDataValue('emailHash', bcrypt.hashSync(value, 10));
                 }
-            },
-        },{
+            }
+        }, {
             sequelize,
             timestamps:  true,
             underscored: false,
@@ -82,16 +88,16 @@ export default class User extends Sequelize.Model {
 
         // hash the password
         if (!user.passHash) {
-            user.passHash = await bcrypt.hash(user.password, 10)
+            user.passHash = await bcrypt.hash(user.password, 10);
         }
 
         // hash the email
-        if(!user.emailHash && user.email) {
-            user.emailHash = await bcrypt.hash(user.email, 10)
+        if (!user.emailHash && user.email) {
+            user.emailHash = await bcrypt.hash(user.email, 10);
         }
 
         // Email verification token
-        user.emailVerification = crypto.randomBytes(20).toString('hex')
+        user.emailVerification = crypto.randomBytes(20).toString('hex');
     }
 
     static afterDestroy(user : self) : Promise<void> {
@@ -144,7 +150,7 @@ export default class User extends Sequelize.Model {
         if (authenticator.check(token2fa, this._2FAKey)) {
             return Promise.resolve(true);
         } else {
-            return Promise.reject(new Error('2FA is incorrect'));        
+            return Promise.reject(new Error('2FA is incorrect'));
         }
     }
 
@@ -187,7 +193,7 @@ export default class User extends Sequelize.Model {
     }
 
     // Example function to test auth
-    getPublicData() : Object {
+    async getPublicData() : Object {
         let ret = {};
         ret.id = this.UUID;
         ret.email = this.email;
@@ -197,22 +203,24 @@ export default class User extends Sequelize.Model {
         ret.birthday = this.birthday;
         ret.preferredCurrency = this.preferredCurrency;
         ret.defaultAccount = this.defaultAccount;
-        ret.hasVerifiedEmail = !!this.hasVerifiedEmail;
-        /**
-            And whatever needs to be taken
-         */
+        ret.hasVerifiedEmail = Boolean(this.hasVerifiedEmail);
+        
+        const vault = await this.getVault();
+        console.log(vault)
+        ret.vault = vault ? { wallet: vault.wallet, identifier: vault.identifier } : null;
+
         return ret;
     }
 
     // Send a confirmation email to this user, post signup
-    async sendVerificationEmail(): Promise<void> {
+    async sendVerificationEmail() : Promise<void> {
         await sendGridMail.send({
-            to: this.email,
-            from: process.env.SENDGRID_FROM_EMAIL,
-            templateId: process.env.SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID,
+            to:                    this.email,
+            from:                  process.env.SENDGRID_FROM_EMAIL,
+            templateId:            process.env.SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID,
             dynamic_template_data: {
-                domain: process.env.WALLET_DOMAIN,
-                emailHash: encodeURIComponent(this.emailHash),
+                domain:            process.env.WALLET_DOMAIN,
+                emailHash:         encodeURIComponent(this.emailHash),
                 emailVerification: encodeURIComponent(this.emailVerification)
             }
         });

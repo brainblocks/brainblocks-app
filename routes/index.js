@@ -8,5 +8,3 @@ let router = express.Router();
 router.use('/api', apiRouter);
 
 export default router;
-
-

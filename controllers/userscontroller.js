@@ -1,7 +1,7 @@
 /* @flow */
 import { Op } from 'sequelize';
 
-import { checkPassword, checkCurrency } from '../middleware/validator';
+import { checkPassword } from '../middleware/validator';
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
@@ -111,29 +111,29 @@ exp.update = (req : Object, res : Object) => {
     return res.status(200).send({ status: 'Success' });
 };
 
-exp.verifyEmail = async (req: Object, res: Object) => {
+exp.verifyEmail = async (req : Object, res : Object) => {
     const success = new SuccessResponse(res);
     const error = new ErrorResponse(res);
-    const {hash, verification} = req.body || {};
+    const { hash, verification } = req.body || {};
 
-    if(hash !== req.user.emailHash) {
-        return error.badRequest("Could not verify email");
+    if (hash !== req.user.emailHash) {
+        return error.badRequest('Could not verify email');
     }
 
-    if(verification !== req.user.emailVerification) {
-        return error.badRequest("Could not verify email");
+    if (verification !== req.user.emailVerification) {
+        return error.badRequest('Could not verify email');
     }
 
     req.user.hasVerifiedEmail = true;
-    await req.user.save()
+    await req.user.save();
 
-    success.send(req.user.getPublicData())
+    success.send(req.user.getPublicData());
 };
 
-exp.resendVerificationEmail = async (req: Object, res: Object) => {
-    await req.user.sendVerificationEmail()
+exp.resendVerificationEmail = async (req : Object, res : Object) => {
+    await req.user.sendVerificationEmail();
 
-    new SuccessResponse(res).send(req.user.getPublicData())
+    new SuccessResponse(res).send(req.user.getPublicData());
 };
 
 exp.addContact = async (req : Object, res : Object) => {
