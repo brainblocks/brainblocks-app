@@ -17,6 +17,15 @@ export default {
                 type:      Sequelize.STRING,
                 allowNull: false
             },
+            authorized: {
+                type:      Sequelize.BOOLEAN,
+                allowNull: false
+            },
+            randId: {
+                type:      Sequelize.STRING,
+                allowNull: false,
+                defaultValue:
+            },
             validUntil: {
                 type:      Sequelize.DATE,
                 allowNull: false

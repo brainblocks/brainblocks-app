@@ -1,5 +1,6 @@
 /* @flow */
 import { Op } from 'sequelize';
+import crypto from 'crypto';
 
 import ErrorResponse from '../responses/error_response';
 import SuccessResponse from '../responses/success_response';
@@ -112,31 +113,48 @@ export default class {
 
         loginInfo.userId = user.id;
 
-        // Calulate amount of attempts and time since last attempt
-        let lastSuccessId = (await LoginLog.max('id', { where: { 'userId': loginInfo.userId, 'success': true } })) || 0;
-        loginInfo.attemptCount = (await LoginLog.count({ where: { 'userId': loginInfo.userId, 'success': false, 'id': { [Op.gt]: lastSuccessId } } }) + 1);
-        
-        let lastAttemptTime = await LoginLog.max('createdAt', { where: { 'userId': loginInfo.userId } });
-        let minutesSinceLastAttempt = ((Date.now() - lastAttemptTime) / 60000);
+        // Bad attempts throttling
+        if (process.env.ENFORCE_BAD_ATTEMPTS_THROTTLE === 'true'){
+            // Calulate amount of attempts and time since last attempt
+            let lastSuccessId = (await LoginLog.max('id', { where: { 'userId': loginInfo.userId, 'success': true } })) || 0;
+            loginInfo.attemptCount = (await LoginLog.count({ where: { 'userId': loginInfo.userId, 'success': false, 'id': { [Op.gt]: lastSuccessId } } }) + 1);
+            
+            let lastAttemptTime = await LoginLog.max('createdAt', { where: { 'userId': loginInfo.userId } });
+            let minutesSinceLastAttempt = ((Date.now() - lastAttemptTime) / 60000);
 
-        // Block attempts
-        if (loginInfo.attemptCount > 3 && minutesSinceLastAttempt < 5) {
-            loginInfo.failReason = 'Too many failed attempts';
-            LoginLog.create(loginInfo);
-            return error.forbidden('Too many bad attempts, please wait 5 minutes.');
-        }
+            // Block attempts
+            if (loginInfo.attemptCount > 3 && minutesSinceLastAttempt < 5) {
+                loginInfo.failReason = 'Too many failed attempts';
+                LoginLog.create(loginInfo);
+                return error.forbidden('Too many bad attempts, please wait 5 minutes.');
+            }
+        } 
 
         // Check if IP authorized
-        const checkIp = await AuthorizedIp.findOne({
-            where: { 'userId': loginInfo.userId, 'ip': loginInfo.ip }
-        });
+        if (process.env.ENFORCE_IP_AUTH === 'true') {
+            const checkIp = await AuthorizedIp.findOne({
+                where: { 'userId': loginInfo.userId, 'ip': loginInfo.ip, 'authorized': true }
+            });
 
-        // If IP not found
-        if (!checkIp) {
-            loginInfo.failReason = 'IP not authorized';
-            LoginLog.create(loginInfo);
-            return error.forbidden('IP not authorized');
+            // If IP not found
+            if (!checkIp) {
+
+                let authip = {
+                    userId:       loginInfo.userId,
+                    ip:           req.headers['x-real-ip'] || req.connection.remoteAddress,
+                    randId:       crypto.randomBytes(20).toString('hex')
+                };
+
+                AuthorizedIp.create(authip)
+
+                await user.sendIpAuthEmail(authip.randId);
+
+                loginInfo.failReason = 'IP not authorized';
+                LoginLog.create(loginInfo);
+                return error.forbidden('Please authorize IP');
+            }
         }
+        
         // Check password
         const check = await user.checkPassword(password);
 
