@@ -1,21 +1,23 @@
-import { isString } from "util";
-
 /* @flow */
+
 export default class SuccessResponse {
-	response;
+    response : Object;
 
-	constructor(response) {
-		this.response = response;
-	}
+    constructor(response : Object | string) {
+        this.response = response;
+    }
 
-	send(payload = {}) {
-		if(isString(payload)) {
-			payload = {message: payload};
-		}
+    send(payload : Object | string = {}) : Object {
 
-		payload = Object.assign(payload, {
-			status: "success"
-		})
-		return this.response.status(200).send(payload)
-	}
+        if (typeof payload === 'string') {
+            payload = { message: payload };
+        }
+
+        payload = {
+            ...payload,
+            status: 'success'
+        };
+
+        return this.response.status(200).send(payload);
+    }
 }

@@ -8,6 +8,15 @@ import db from '../models';
 
 const { User, UserToken, LoginLog, AuthorizedIp } = db.models;
 
+type LoginInfo = {
+    userId : number,
+    success : boolean,
+    failReason : null | string,
+    attemptCount : number,
+    ip : string,
+    requestData : string
+};
+
 export default class {
     // Checks the headers for an x-auth-token and return sthe validate session + user data if one is found
     // Returns a 401 if no auth token is set, is invalid, or is expired
@@ -36,7 +45,7 @@ export default class {
 
         return success.send({
             status:  'success',
-            user:    user.getPublicData(),
+            user:    await user.getPublicData(),
             token:   userToken.getJWT().toString(),
             expires: userToken.expires
         });
@@ -53,7 +62,7 @@ export default class {
         let searchBy;
 
         // Defines template of information to store in loginInfo table
-        let loginInfo = {
+        let loginInfo : LoginInfo = {
             userId:       -1,
             success:      false,
             failReason:   null,

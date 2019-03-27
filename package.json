@@ -44,10 +44,13 @@
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
+    "big-integer": "^1.6.42",
     "eslint-plugin-flowtype": "^2.50.3",
     "flow-bin": "^0.82.0",
     "flow-remove-types": "^1.2.3",
     "mocha": "^5.2.0",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "supertest": "^3.3.0"
   }
 }
