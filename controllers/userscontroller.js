@@ -72,12 +72,12 @@ exp.create = async (req : Object, res : Object) => {
         status:  'success',
         token:   token.getJWT().toString(),
         expires: token.expires,
-        user:    user.getPublicData()
+        user:    await user.getPublicData()
     });
 };
 
-exp.getUser = (req : Object, res : Object) => {
-    return res.status(200).send({ user: req.user.getPublicData(), status: 'success' });
+exp.getUser = async (req : Object, res : Object) => {
+    return res.status(200).send({ user: await req.user.getPublicData(), status: 'success' });
 };
 
 exp.update = (req : Object, res : Object) => {
@@ -128,13 +128,13 @@ exp.verifyEmail = async (req : Object, res : Object) => {
     req.user.hasVerifiedEmail = true;
     await req.user.save();
 
-    success.send(req.user.getPublicData());
+    success.send(await req.user.getPublicData());
 };
 
 exp.resendVerificationEmail = async (req : Object, res : Object) => {
     await req.user.sendVerificationEmail();
 
-    new SuccessResponse(res).send(req.user.getPublicData());
+    new SuccessResponse(res).send(await req.user.getPublicData());
 };
 
 // Authenticate an IP for a user

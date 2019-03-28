@@ -202,7 +202,7 @@ export default class {
 
         return success.send({
             status:  'success',
-            user:    user.getPublicData(),
+            user:    await user.getPublicData(),
             token:   token.getJWT().toString(),
             expires: token.expires
         });
