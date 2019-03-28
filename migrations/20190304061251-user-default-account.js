@@ -1,13 +1,14 @@
-'use strict';
+/* @flow */
+/* eslint import/no-commonjs: off */
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn('Users', 'defaultAccount', Sequelize.STRING)
-    return queryInterface
-  },
+    up: async (queryInterface, Sequelize) => {
+        await queryInterface.addColumn('Users', 'defaultAccount', Sequelize.STRING);
+        return queryInterface;
+    },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeColumn('Users', 'defaultAccount');
-    return queryInterface
-  }
+    down: async (queryInterface, Sequelize) => {
+        await queryInterface.removeColumn('Users', 'defaultAccount', Sequelize.STRING);
+        return queryInterface;
+    }
 };
