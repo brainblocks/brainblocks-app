@@ -20,6 +20,10 @@ export function toBigInt(num : string) {
     return bigInt(num);
 }
 
+export async function wait(ms : number) : Promise<void> {
+    return await new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function nanoAction<R : Object>(action : string, args : Object = {}) : Promise<R> {
 
     console.log((new Date()).toUTCString(), 'START', action, args);
@@ -49,7 +53,7 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
 
         res = await request({
             method: 'POST',
-            uri:    RAI_SERVER,
+            uri:    development.host,
             body:   JSON.stringify({
                 action,
                 ...args
@@ -86,7 +90,7 @@ export async function republishBlock(hash : string)  {
         hash
     });
 
-    return res.blocks
+    return res.blocks;
 }
 
 export async function getFrontiers(accounts : Array<string>)  {
@@ -95,7 +99,7 @@ export async function getFrontiers(accounts : Array<string>)  {
         count: '500'
     });
 
-    return res.frontiers
+    return res.frontiers;
 }
 
 export async function getChain(block : string)  {
@@ -104,7 +108,16 @@ export async function getChain(block : string)  {
         count: '500'
     });
 
-    return res.blocks
+    return res.blocks;
+}
+
+export async function getPendingBlocks(accounts : Array<string>)  {
+    let res = await nanoAction('accounts_pending', {
+        accounts,
+        count: '500'
+    });
+
+    return res.blocks;
 }
 
 export async function getHashes(hashes : Array<string>)  {
@@ -113,7 +126,12 @@ export async function getHashes(hashes : Array<string>)  {
         source: true
     });
 
-    return res.blocks
+    return res.blocks;
+}
+
+export async function getInfo(hash : string)  {
+    let res = await nanoAction('block_info', { hash });
+    return res;
 }
 
 export async function getBlockAccount(hash : string) : Promise<string> {
@@ -121,7 +139,7 @@ export async function getBlockAccount(hash : string) : Promise<string> {
         hash
     });
 
-    return res.account
+    return res.account;
 }
 
 export async function getBalance(account : string) : Promise<{ balance : string, pending : string }> {
@@ -174,5 +192,35 @@ export async function getChains(accounts : Array<string>) {
         res.accounts[account] = accountObject;
     };
 
+    return res;
+}
+
+export async function getPending(accounts : Array<string>) {
+    const pending = await getPendingBlocks(accounts);
+    const res = {accounts:{}};
+
+    for (let account of Object.keys(pending)) {
+        const data = pending[account];
+
+        if (Array.isArray(data) && data.length > 0) {
+            const blocks = [];
+            const hashes = await getHashes(data);
+
+            for (let hash of Object.keys(hashes)) {
+                const info = hashes[hash];
+                const blockObject = {};
+                blockObject.amount = info.amount;
+                blockObject.from = info.block_account;
+                blockObject.hash = hash;
+                blocks.push(blockObject);
+            }
+
+            const accountObject = {};
+            accountObject.account = account;
+            accountObject.blocks = blocks
+
+            res.accounts[account] = accountObject;
+        }
+    }
     return res;
 }

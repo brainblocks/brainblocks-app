@@ -19,7 +19,7 @@ type LoginInfo = {
 };
 
 export default class {
-    // Checks the headers for an x-auth-token and return sthe validate session + user data if one is found
+    // Checks the headers for an x-auth-token and returns the validate session + user data if one is found
     // Returns a 401 if no auth token is set, is invalid, or is expired
     // Depends on the authentication middleware
     static async fetch(req : Object, res : Object) : Object {
@@ -207,7 +207,7 @@ export default class {
             expires: token.expires
         });
     }
-
+    
     // Attempts to destroy the existing session. Acts as a logout
     // Returns a 400 if the session is invalid
     static async logout(req : Object, res : Object) : Object {

@@ -25,6 +25,7 @@
     "debug": "~2.6.9",
     "dotenv": "^6.0.0",
     "express": "~4.16.0",
+    "express-ws": "^4.0.0",
     "grumbler-scripts": "^2.0.74",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
@@ -40,7 +41,8 @@
     "sequelize": "^4.39.0",
     "sequelize-cli": "^4.1.1",
     "uuid": "^3.3.2",
-    "validator": "^10.8.0"
+    "validator": "^10.8.0",
+    "ws": "^6.2.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
