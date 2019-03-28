@@ -7,47 +7,74 @@ import { getChains, republishBlock, getBalance, getBlockAccount, process } from 
 
 export default class {
 
-    static async chains ( req : Object, res : Object ) : Promise<void>{
+    static async chains (req : Object, res : Object) : Promise<void> {
         const accounts = req.body.accounts;
-        const chains = await getChains(accounts);
         let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
 
-        success.send({
-            status:   'success',
-            accounts: chains.accounts
-        });
+        try {
+            const chains = await getChains(accounts);
+
+            success.send({
+                status:   'success',
+                accounts: chains.accounts
+            });
+        } catch (err) {
+            console.error(`Error getting chains`, err);
+            return error.send('Error getting chains');
+        }
     }
 
-    static async republish ( req : Object, res : Object ) : Promise<void> {
-    	const hash = req.body.hash;
-    	const block = await republishBlock(hash);
-    	let success = new SuccessResponse(res);
+    static async republish (req : Object, res : Object) : Promise<void> {
+        const hash = req.body.hash;
+        let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
 
-    	success.send({
-    		status: 'success',
-    		blocks: block,
-    	});
+        try {
+            const block = await republishBlock(hash);
+            success.send({
+                status: 'success',
+                blocks: block
+            });
+        } catch (err) {
+            console.error(`Error in republish`, err);
+            return error.send('Error in republish');
+        }
+        
     }
 
-    static async broadcast ( req : Object, res : Object ) : Promise<void> {
+    static async broadcast (req : Object, res : Object) : Promise<void> {
         const block = JSON.parse(req.body.block);
         const amount = req.body.amount;
-        const account = await getBlockAccount(block.previous);
         let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
+
+        let account;
+        try {
+            account = await getBlockAccount(block.previous);
+        } catch (err) {
+            console.error('Error getting account before broadcast', err);
+            return error.send('Error getting account before broadcast');
+        }
 
         if (amount !== 'false') {
-            let { balance } = await getBalance(account)
+            let { balance } = await getBalance(account);
             if (bigInt(balance) !== bigInt(amount)) {
-                return res.status(400).send({ error: 'Client account balance does not match actual balance.' });
+                return error.badRequest('Client account balance does not match actual balance.');
             }
         }
 
-        const processBlock = await process(req.body.block);
+        try {
+            const processBlock = await process(req.body.block);
 
-        success.send({
-            status: 'success',
-            hash: processBlock
-        });
+            success.send({
+                status: 'success',
+                hash:   processBlock
+            });
+        } catch (err) {
+            console.error('Error broadcasting block', err);
+            return error.send('Error broadcasting block');
+        }
 
     }
 }

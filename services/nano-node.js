@@ -16,7 +16,7 @@ export type BigInt = {|
     equals : (mixed) => boolean
 |};
 
-export function toBigInt(num : string) {
+export function toBigInt(num : string) : BigInt {
     return bigInt(num);
 }
 
@@ -29,6 +29,11 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
     console.log((new Date()).toUTCString(), 'START', action, args);
 
     let res;
+    let body = JSON.stringify({
+        action,
+        ...args
+    });
+    const nano_addrs = body.match(/nano_[13][13456789abcdefghijkmnopqrstuwxyz]{59}/g);
 
     try {
         res = await request({
@@ -37,10 +42,7 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
             headers: {
                 'content-type': 'application/json'
             },
-            body:   JSON.stringify({
-                action,
-                ...args
-            }),
+            body,
             resolveWithFullResponse: true
         });
 
@@ -52,12 +54,9 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
         await wait(8000);
 
         res = await request({
-            method: 'POST',
-            uri:    development.host,
-            body:   JSON.stringify({
-                action,
-                ...args
-            }),
+            method:                  'POST',
+            uri:                     development.host,
+            body,
             resolveWithFullResponse: true
         });
     }
@@ -66,6 +65,14 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
 
     if (res.statusCode !== 200) {
         throw new Error(`Expected status to be 200, got ${ res.statusCode } for action: ${ action }`);
+    }
+
+    // convert xrb_ addresses back to nano_ if they started out that way
+    if (Array.isArray(nano_addrs)) {
+        nano_addrs.forEach(addr => {
+            const xrb_addr = addr.replace('nano_', 'xrb_');
+            res.body = res.body.replace(xrb_addr, addr);
+        });
     }
 
     let data = JSON.parse(res.body);
@@ -85,7 +92,7 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
     return data;
 }
 
-export async function republishBlock(hash : string)  {
+export async function republishBlock(hash : string) : Promise<Object>  {
     let res = await nanoAction('republish', {
         hash
     });
@@ -93,7 +100,7 @@ export async function republishBlock(hash : string)  {
     return res.blocks;
 }
 
-export async function getFrontiers(accounts : Array<string>)  {
+export async function getFrontiers(accounts : Array<string>) : Promise<Object> {
     let res = await nanoAction('accounts_frontiers', {
         accounts,
         count: '500'
@@ -102,7 +109,7 @@ export async function getFrontiers(accounts : Array<string>)  {
     return res.frontiers;
 }
 
-export async function getChain(block : string)  {
+export async function getChain(block : string) : Promise<Array<string>>  {
     let res = await nanoAction('chain', {
         block,
         count: '500'
@@ -111,7 +118,7 @@ export async function getChain(block : string)  {
     return res.blocks;
 }
 
-export async function getPendingBlocks(accounts : Array<string>)  {
+export async function getPendingBlocks(accounts : Array<string>) : Promise<Object> {
     let res = await nanoAction('accounts_pending', {
         accounts,
         count: '500'
@@ -120,7 +127,7 @@ export async function getPendingBlocks(accounts : Array<string>)  {
     return res.blocks;
 }
 
-export async function getHashes(hashes : Array<string>)  {
+export async function getHashes(hashes : Array<string>) : Promise<Object>  {
     let res = await nanoAction('blocks_info', {
         hashes,
         source: true
@@ -129,7 +136,7 @@ export async function getHashes(hashes : Array<string>)  {
     return res.blocks;
 }
 
-export async function getInfo(hash : string)  {
+export async function getInfo(hash : string) : Object {
     let res = await nanoAction('block_info', { hash });
     return res;
 }
@@ -151,53 +158,52 @@ export async function getBalance(account : string) : Promise<{ balance : string,
 }
 
 export async function process(block : string) : Promise<string> {
-    let { hash } = await nanoAction('process', { block: block });
+    const serializedBlock = JSON.stringify(block);
+    let { hash } = await nanoAction('process', { block: serializedBlock });
     return hash;
 }
 
-export async function getChains(accounts : Array<string>) {
-	const res = {accounts:{}};
-	const frontiers = await getFrontiers(accounts);
+export async function getChains(accounts : Array<string>) : Promise<Object> {
+    let res = { accounts: {} };
+    const frontiers = await getFrontiers(accounts);
 
     for (let account of accounts) {
-		let { balance, pending } = await getBalance(account);
-        const accountObject = {balance, pending}
+        let { balance, pending } = await getBalance(account);
+        let accountObject = { balance, pending, blocks: [] };
 
-		// check if account is in frontiers
-		if (frontiers.hasOwnProperty(account)) {
-			const chain = await getChain(frontiers[account]);
-			const blocks = await getHashes(chain);
-			const blocks2 = [];
+        // check if account is in frontiers
+        if (frontiers.hasOwnProperty(account)) {
+            const chain = await getChain(frontiers[account]);
+            const blocks = await getHashes(chain);
+            const blocks2 = [];
 
             for (let hash of Object.keys(blocks)) {
-                const data = blocks[hash]
-				const contents = data.contents;
+                let data = blocks[hash];
+                const contents = data.contents;
 
-				if (contents.type == 'open' || contents.type == 'receive') {
-                    data.origin = await getBlockAccount(contents.source)
-				} else if (contents.type == 'state') {
-					// check if it is receiving
-					if (data.source_account) {
-						data.origin = data.source_account;
-					}
-				}
-				
-				blocks2.push(data);
-			};
+                if (contents.type === 'open' || contents.type === 'receive') {
+                    data.origin = await getBlockAccount(contents.source);
+                } else if (contents.type === 'state') {
+                    // check if it is receiving
+                    if (data.source_account) {
+                        data.origin = data.source_account;
+                    }
+                }
+                
+                blocks2.push(data);
+            }
 
-            accountObject.blocks = blocks2
-		} else {
-            accountObject.blocks = [];
-		}
+            accountObject.blocks = blocks2;
+        }
         res.accounts[account] = accountObject;
-    };
+    }
 
     return res;
 }
 
-export async function getPending(accounts : Array<string>) {
+export async function getPending(accounts : Array<string>) : Promise<Object> {
     const pending = await getPendingBlocks(accounts);
-    const res = {accounts:{}};
+    let res = { accounts: {} };
 
     for (let account of Object.keys(pending)) {
         const data = pending[account];
@@ -208,16 +214,14 @@ export async function getPending(accounts : Array<string>) {
 
             for (let hash of Object.keys(hashes)) {
                 const info = hashes[hash];
-                const blockObject = {};
+                let blockObject = {};
                 blockObject.amount = info.amount;
                 blockObject.from = info.block_account;
                 blockObject.hash = hash;
                 blocks.push(blockObject);
             }
 
-            const accountObject = {};
-            accountObject.account = account;
-            accountObject.blocks = blocks
+            const accountObject = { account, blocks };
 
             res.accounts[account] = accountObject;
         }
