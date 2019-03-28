@@ -13,13 +13,13 @@
 					{
 						"key": "Content-Type",
 						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
+						"type": "text",
+						"value": "application/json"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \"email\": \"mochatest@mochatest.fave\", \n\"password\": \"mochatestpassword\"}"
+					"raw": "{ \"username\": \"miquel\",\n\"password\": \"blabla1\"}"
 				},
 				"url": {
 					"raw": "localhost:8080/api/auth/",
@@ -169,6 +169,105 @@
 						"api",
 						"users",
 						"2fa"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"miquel\",\n\t\"email\": \"miquel@blabla.com\", \n\"password\": \"blabla\"}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IpAuth",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"randId\": \"1f5a688b8c5cce3a9d67017a66aac423f5e60db\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/rpc/ipauth",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"rpc",
+						"ipauth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Pwd",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXVpZCI6ImFiNGZjMTU0LTdiNjQtNGQzNS1iNmY0LTE4MGQzZTFiMmQ4ZCIsInR5cGUiOiJhdXRoIiwiZXhwaXJlcyI6IjIwMTktMDQtMjVUMTY6NDM6MTUuMzM1WiIsImlhdCI6MTU1MzgwNTQwOX0.Cq9oeILvrOdRLCN0Ci2ohEcMI1vt6ylJMD_PcryNmAQ",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"password\": \"blabla1\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/auth/validatepwd",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"validatepwd"
 					]
 				}
 			},

@@ -11,4 +11,6 @@ router.get('/', authenticate, AuthController.fetch);
 router.post('/', validate, AuthController.login);
 router.delete('/', authenticate, AuthController.logout);
 
+router.post('/validatepwd', authenticate, AuthController.validatepwd);
+
 export default router;

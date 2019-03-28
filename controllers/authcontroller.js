@@ -114,7 +114,7 @@ export default class {
         loginInfo.userId = user.id;
 
         // Bad attempts throttling
-        if (process.env.ENFORCE_BAD_ATTEMPTS_THROTTLE === 'true'){
+        if (process.env.ENFORCE_BAD_ATTEMPTS_THROTTLE === 'true') {
             // Calulate amount of attempts and time since last attempt
             let lastSuccessId = (await LoginLog.max('id', { where: { 'userId': loginInfo.userId, 'success': true } })) || 0;
             loginInfo.attemptCount = (await LoginLog.count({ where: { 'userId': loginInfo.userId, 'success': false, 'id': { [Op.gt]: lastSuccessId } } }) + 1);
@@ -145,7 +145,7 @@ export default class {
                     randId:       crypto.randomBytes(20).toString('hex')
                 };
 
-                AuthorizedIp.create(authip)
+                AuthorizedIp.create(authip);
 
                 await user.sendIpAuthEmail(authip.randId);
 
@@ -222,4 +222,29 @@ export default class {
         userToken.destroy();
         return success.send('Successfully Logged out');
     }
+
+    static async validatepwd(req : Object, res : Object) : Object {
+        const error = new ErrorResponse(res);
+        const success = new SuccessResponse(res);
+
+        const { password } = req.body;
+        const { user } = req;
+
+        // If password is not provided in request
+        if (!password) {
+            return error.badRequest('Password must be provided');
+        }
+
+        // Check password
+        const check = await user.checkPassword(password);
+
+        // If password is incorrect
+        if (!check) {
+            return error.forbidden('False');
+        }
+
+        // If correct
+        return success.send('True');
+    }
+
 }
