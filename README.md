@@ -17,6 +17,8 @@ Following which, edit the database settings in `.env`. You should update the use
 
 Once done, run these commands:
 
+**NOTE:** If the DB already exists and has to be regenerated from scratch for some reason, run `npm run sequelize db:drop` first (CAUTION - THIS DROPS THE WHOLE DB).
+
 ```
 npm run sequelize -- db:create
 npm run sequelize -- db:migrate
