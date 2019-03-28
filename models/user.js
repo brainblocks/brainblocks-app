@@ -9,7 +9,6 @@ import authenticator from 'otplib/authenticator';
 import sendGridMail from '@sendgrid/mail';
 
 import UserToken from './usertoken';
-import Vault from './vault';
 
 sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
 authenticator.options = { crypto };
@@ -204,9 +203,9 @@ export default class User extends Sequelize.Model {
         ret.preferredCurrency = this.preferredCurrency;
         ret.defaultAccount = this.defaultAccount;
         ret.hasVerifiedEmail = Boolean(this.hasVerifiedEmail);
-        
+
         const vault = await this.getVault();
-        console.log(vault)
+        console.log(vault);
         ret.vault = vault ? { wallet: vault.wallet, identifier: vault.identifier } : null;
 
         return ret;
