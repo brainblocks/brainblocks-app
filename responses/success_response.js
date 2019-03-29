@@ -3,7 +3,7 @@
 export default class SuccessResponse {
     response : Object;
 
-    constructor(response : Object | string) {
+    constructor(response : Object) {
         this.response = response;
     }
 

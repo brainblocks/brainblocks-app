@@ -3,7 +3,7 @@
 
 // $eslint-ignore-next-line
 module.exports = {
-    up: async (queryInterface, Sequelize) => {
+    up: async (queryInterface : Object, Sequelize : Object) => {
         await queryInterface.addColumn('Vaults', 'walletBackup', Sequelize.TEXT);
         await queryInterface.removeColumn('Vaults', 'loginKeyHash');
         await queryInterface.removeColumn('Vaults', 'loginKeySalt');
@@ -12,7 +12,7 @@ module.exports = {
         return queryInterface;
     },
 
-    down: async (queryInterface, Sequelize) => {
+    down: async (queryInterface : Object, Sequelize : Object) => {
         await queryInterface.removeColumn('Users', 'walletBackup');
         await queryInterface.addColumn('Vaults', 'loginKeyHash', Sequelize.STRING);
         await queryInterface.addColumn('Vaults', 'loginKeySalt', Sequelize.STRING);
