@@ -165,9 +165,11 @@ export function validate(req : Object, res : Object, next : Function) : mixed {
     if (req.body.hash && req.body.block) {
         const hash = req.body.hash;
         const block = req.body.block;
+
         if ((hash.length !== 64) || !hex2bin(hash)) {
             return res.status(400).send({ error: 'Invalid Nano hash' });
         }
+
         if (!isValidJSON(block)) {
             return res.status(400).send({ error: 'Invalid Block JSON' });
         }
@@ -181,4 +183,3 @@ export function validate(req : Object, res : Object, next : Function) : mixed {
 
     next();
 }
-

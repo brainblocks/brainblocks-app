@@ -16,6 +16,19 @@ export type BigInt = {|
     equals : (mixed) => boolean
 |};
 
+type Block = {
+    type : string,
+    account : string,
+    previous : string,
+    representative : string,
+    balance : BigInt,
+    link? : string,
+    source? : string,
+    link_as_account : string,
+    signature : string,
+    work : string
+};
+
 export function toBigInt(num : string) : BigInt {
     return bigInt(num);
 }
@@ -160,10 +173,19 @@ export async function getBalance(account : string) : Promise<{ balance : string,
     };
 }
 
-export async function process(block : string) : Promise<string> {
+export async function process(block : Block) : Promise<string> {
     const serializedBlock = JSON.stringify(block);
     let { hash } = await nanoAction('process', { block: serializedBlock });
     return hash;
+}
+
+export async function generateWork(hash : string) : Promise<string> {
+    let { work } = await nanoAction('work_generate', {
+        hash,
+        use_peers: true
+    });
+
+    return work;
 }
 
 export async function getChains(inputAccounts : Array<string>) : Promise<Object> {

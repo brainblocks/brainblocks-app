@@ -3,7 +3,7 @@ import bigInt from 'big-integer';
 
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
-import { getChains, republishBlock, getBalance, getBlockAccount, process } from '../services/nano-node';
+import { getChains, republishBlock, getBalance, getBlockAccount, process, generateWork } from '../services/nano-node';
 
 export default class {
 
@@ -40,16 +40,22 @@ export default class {
             console.error(`Error in republish`, err);
             return error.send('Error in republish');
         }
-        
+
     }
 
     static async broadcast (req : Object, res : Object) : Promise<void> {
-        const block = JSON.parse(req.body.block);
-        const amount = req.body.amount;
         let success = new SuccessResponse(res);
         let error = new ErrorResponse(res);
 
+        let block = JSON.parse(req.body.block);
+        const hash = req.body.hash;
+        // get work and attach to block
+        const work = await generateWork(hash);
+        block.work = work;
+        console.log('block: ', block);
+        const amount = req.body.amount;
         let account;
+
         try {
             account = await getBlockAccount(block.previous);
         } catch (err) {
@@ -65,7 +71,7 @@ export default class {
         }
 
         try {
-            const processBlock = await process(req.body.block);
+            const processBlock = await process(block);
 
             success.send({
                 status: 'success',
