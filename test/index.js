@@ -91,7 +91,7 @@ describe('App', () => {
                 .set('Content-Type', 'application/json')
                 .send({ email: 'mochatest@mochatest.fave', password: 'invalid password here' })
                 .expect('Content-Type', /json/)
-                .expect(400)
+                .expect(403)
                 .end((err, res) => {
                     if (err) {
                         console.log(res.error.text);
@@ -105,7 +105,7 @@ describe('App', () => {
                 .set('Content-Type', 'application/json')
                 .send({ email: 'unexisting@mochatest.fave', password: 'invalid password here' })
                 .expect('Content-Type', /json/)
-                .expect(400)
+                .expect(403)
                 .end((err, res) => {
                     if (err) {
                         console.log(res.error.text);

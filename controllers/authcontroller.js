@@ -1,6 +1,7 @@
 /* @flow */
-import { Op } from 'sequelize';
 import crypto from 'crypto';
+
+import { Op } from 'sequelize';
 
 import ErrorResponse from '../responses/error_response';
 import SuccessResponse from '../responses/success_response';
@@ -92,7 +93,7 @@ export default class {
                 return error.forbidden('Invalid Recaptcha');
             }
         }
-        
+
         // Get user
         if (username) {
             searchBy = { username };
@@ -118,7 +119,7 @@ export default class {
             // Calulate amount of attempts and time since last attempt
             let lastSuccessId = (await LoginLog.max('id', { where: { 'userId': loginInfo.userId, 'success': true } })) || 0;
             loginInfo.attemptCount = (await LoginLog.count({ where: { 'userId': loginInfo.userId, 'success': false, 'id': { [Op.gt]: lastSuccessId } } }) + 1);
-            
+
             let lastAttemptTime = await LoginLog.max('createdAt', { where: { 'userId': loginInfo.userId } });
             let minutesSinceLastAttempt = ((Date.now() - lastAttemptTime) / 60000);
 
@@ -128,7 +129,7 @@ export default class {
                 LoginLog.create(loginInfo);
                 return error.forbidden('Too many bad attempts, please wait 5 minutes.');
             }
-        } 
+        }
 
         // Check if IP authorized
         if (process.env.ENFORCE_IP_AUTH === 'true') {
@@ -154,7 +155,7 @@ export default class {
                 return error.forbidden('Please authorize IP');
             }
         }
-        
+
         // Check password
         const check = await user.checkPassword(password);
 
@@ -207,7 +208,7 @@ export default class {
             expires: token.expires
         });
     }
-    
+
     // Attempts to destroy the existing session. Acts as a logout
     // Returns a 400 if the session is invalid
     static async logout(req : Object, res : Object) : Object {
