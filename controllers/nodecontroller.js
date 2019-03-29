@@ -75,7 +75,8 @@ export default class {
 
             success.send({
                 status: 'success',
-                hash:   processBlock
+                hash:   processBlock,
+                work
             });
         } catch (err) {
             console.error('Error broadcasting block', err);
