@@ -33,7 +33,6 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
         action,
         ...args
     });
-    const nano_addrs = body.match(/nano_[13][13456789abcdefghijkmnopqrstuwxyz]{59}/g);
 
     try {
         res = await request({
@@ -65,14 +64,6 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
 
     if (res.statusCode !== 200) {
         throw new Error(`Expected status to be 200, got ${ res.statusCode } for action: ${ action }`);
-    }
-
-    // convert xrb_ addresses back to nano_ if they started out that way
-    if (Array.isArray(nano_addrs)) {
-        nano_addrs.forEach(addr => {
-            const xrb_addr = addr.replace('nano_', 'xrb_');
-            res.body = res.body.replace(xrb_addr, addr);
-        });
     }
 
     let data = JSON.parse(res.body);
@@ -132,12 +123,24 @@ export async function getHashes(hashes : Array<string>) : Promise<Object>  {
         hashes,
         source: true
     });
-
     return res.blocks;
 }
 
 export async function getInfo(hash : string) : Object {
     let res = await nanoAction('block_info', { hash });
+    // replace xrb_ for nano_
+    res.block_account = res.block_account.replace('xrb_', 'nano_');
+
+    if (res.contents.account) {
+        res.contents.account = res.contents.account.replace('xrb_', 'nano_');
+    }
+    if (res.contents.representative) {
+        res.contents.representative = res.contents.representative.replace('xrb_', 'nano_');
+    }
+    if (res.contents.link_as_account) {
+        res.contents.link_as_account = res.contents.link_as_account.replace('xrb_', 'nano_');
+    }
+    // return block
     return res;
 }
 
@@ -146,7 +149,7 @@ export async function getBlockAccount(hash : string) : Promise<string> {
         hash
     });
 
-    return res.account;
+    return res.account.replace('xrb_', 'nano_');
 }
 
 export async function getBalance(account : string) : Promise<{ balance : string, pending : string }> {
@@ -163,8 +166,14 @@ export async function process(block : string) : Promise<string> {
     return hash;
 }
 
-export async function getChains(accounts : Array<string>) : Promise<Object> {
+export async function getChains(inputAccounts : Array<string>) : Promise<Object> {
     let res = { accounts: {} };
+    let accounts = [];
+
+    for (let account of inputAccounts) {
+        accounts.push(account.replace('xrb_', 'nano_'));
+    }
+
     const frontiers = await getFrontiers(accounts);
 
     for (let account of accounts) {
@@ -172,24 +181,42 @@ export async function getChains(accounts : Array<string>) : Promise<Object> {
         let accountObject = { balance, pending, blocks: [] };
 
         // check if account is in frontiers
-        if (frontiers.hasOwnProperty(account)) {
-            const chain = await getChain(frontiers[account]);
+        if (frontiers.hasOwnProperty(account.replace('nano_', 'xrb_'))) {
+            const chain = await getChain(frontiers[account.replace('nano_', 'xrb_')]);
             const blocks = await getHashes(chain);
             const blocks2 = [];
 
             for (let hash of Object.keys(blocks)) {
                 let data = blocks[hash];
-                const contents = data.contents;
+                let contents = JSON.parse(data.contents);
+
+                if (data.block_account) {
+                    data.block_account = data.block_account.replace('xrb_', 'nano_');
+                }
+                if (data.source_account) {
+                    data.source_account = data.source_account.replace('xrb_', 'nano_');
+                }
+                if (contents.account) {
+                    contents.account = contents.account.replace('xrb_', 'nano_');
+                }
+                if (contents.representative) {
+                    contents.representative = contents.representative.replace('xrb_', 'nano_');
+                }
+                if (contents.link_as_account) {
+                    contents.link_as_account = contents.link_as_account.replace('xrb_', 'nano_');
+                }
+
+                // write contents changes back to data block
+                data.contents = JSON.stringify(contents);
 
                 if (contents.type === 'open' || contents.type === 'receive') {
-                    data.origin = await getBlockAccount(contents.source);
+                    data.origin = await getBlockAccount(contents.source).replace('xrb_', 'nano_');
                 } else if (contents.type === 'state') {
                     // check if it is receiving
                     if (data.source_account) {
-                        data.origin = data.source_account;
+                        data.origin = data.source_account.replace('xrb_', 'nano_');
                     }
                 }
-                
                 blocks2.push(data);
             }
 
@@ -201,7 +228,13 @@ export async function getChains(accounts : Array<string>) : Promise<Object> {
     return res;
 }
 
-export async function getPending(accounts : Array<string>) : Promise<Object> {
+export async function getPending(inputAccounts : Array<string>) : Promise<Object> {
+    // replace xrb_ with nano_
+    let accounts = [];
+
+    for (let account of inputAccounts) {
+        accounts.push(account.replace('xrb_', 'nano_'));
+    }
     const pending = await getPendingBlocks(accounts);
     let res = { accounts: {} };
 
@@ -216,14 +249,14 @@ export async function getPending(accounts : Array<string>) : Promise<Object> {
                 const info = hashes[hash];
                 let blockObject = {};
                 blockObject.amount = info.amount;
-                blockObject.from = info.block_account;
+                blockObject.from = info.block_account.replace('xrb_', 'nano_');
                 blockObject.hash = hash;
                 blocks.push(blockObject);
             }
+            const nanoAccount = account.replace('xrb_', 'nano_');
+            const accountObject = { account: nanoAccount, blocks };
 
-            const accountObject = { account, blocks };
-
-            res.accounts[account] = accountObject;
+            res.accounts[nanoAccount] = accountObject;
         }
     }
     return res;

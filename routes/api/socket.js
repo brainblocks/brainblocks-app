@@ -98,15 +98,19 @@ async function getPendingBlocks(ws, accounts) : Promise<void> {
 }
 
 function parseEvent(ws, event) {
+    let accounts = [];
+    for (let account of event.data) {
+        accounts.push(account.replace('xrb_', 'nano_'));
+    }
     switch (event.event) {
     case 'subscribe':
-        subscribeAccounts(ws, event.data);
+        subscribeAccounts(ws, accounts);
         break;
     case 'unsubscribe':
-        unsubscribeAccounts(ws, event.data);
+        unsubscribeAccounts(ws, accounts);
         break;
     case 'pending':
-        getPendingBlocks(ws, event.data);
+        getPendingBlocks(ws, accounts);
         break;
     default:
         break;
@@ -131,11 +135,13 @@ router.post('/new-block/:key/submit', async (req, res) => {
 
     if (fullBlock.block.type === 'state') {
         if (fullBlock.is_send === 'true' && fullBlock.block.link_as_account) {
-            destinations.push(fullBlock.block.link_as_account);
+            destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
         }
-        destinations.push(fullBlock.account);
+        // push to destinations array
+        destinations.push(fullBlock.account.replace('xrb_', 'nano_'));
     } else {
-        destinations.push(fullBlock.block.destination);
+        // push to destinations array
+        destinations.push(fullBlock.block.destination.replace('xrb_', 'nano_'));
     }
 
     // Send it to all!
