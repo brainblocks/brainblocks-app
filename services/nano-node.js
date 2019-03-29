@@ -232,11 +232,13 @@ export async function getChains(inputAccounts : Array<string>) : Promise<Object>
                 data.contents = JSON.stringify(contents);
 
                 if (contents.type === 'open' || contents.type === 'receive') {
-                    data.origin = await getBlockAccount(contents.source).replace('xrb_', 'nano_');
+                    const blockAccount = await getBlockAccount(contents.source);
+                    data.origin = blockAccount.replace('xrb_', 'nano_');
                 } else if (contents.type === 'state') {
                     // check if it is receiving
                     if (data.source_account) {
-                        data.origin = data.source_account.replace('xrb_', 'nano_');
+                        const blockAccount = data.source_account;
+                        data.origin = blockAccount.replace('xrb_', 'nano_');
                     }
                 }
                 blocks2.push(data);

@@ -23,8 +23,7 @@ export default {
             },
             randId: {
                 type:      Sequelize.STRING,
-                allowNull: false,
-                defaultValue:
+                allowNull: false
             },
             validUntil: {
                 type:      Sequelize.DATE,

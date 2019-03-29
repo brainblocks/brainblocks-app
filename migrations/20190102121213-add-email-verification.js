@@ -2,7 +2,7 @@
 /* eslint import/no-commonjs: off */
 
 export default {
-    up: async (queryInterface, Sequelize) => {
+    up: async (queryInterface : Object, Sequelize : Object) => {
         await queryInterface.addColumn('Users', 'emailHash', Sequelize.STRING);
         await queryInterface.addColumn('Users', 'emailVerification', Sequelize.STRING);
         await queryInterface.addColumn('Users', 'hasVerifiedEmail', Sequelize.BOOLEAN);
@@ -11,7 +11,7 @@ export default {
         return queryInterface;
     },
 
-    down: async (queryInterface, Sequelize) => {
+    down: async (queryInterface : Object, Sequelize : Object) => {
         await queryInterface.removeColumn('Users', 'emailHash', Sequelize.STRING);
         await queryInterface.removeColumn('Users', 'emailVerification', Sequelize.STRING);
         await queryInterface.removeColumn('Users', 'hasVerifiedEmail', Sequelize.BOOLEAN);

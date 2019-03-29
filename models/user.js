@@ -225,14 +225,14 @@ export default class User extends Sequelize.Model {
         });
     }
 
-    async sendIpAuthEmail(randId): Promise<void> {
+    async sendIpAuthEmail(randId : string) : Promise<void> {
         await sendGridMail.send({
-            to: this.email,
-            from: process.env.SENDGRID_FROM_EMAIL,
-            templateId: process.env.SENDGRID_IP_AUTH_TEMPLATE_ID,
+            to:                    this.email,
+            from:                  process.env.SENDGRID_FROM_EMAIL,
+            templateId:            process.env.SENDGRID_IP_AUTH_TEMPLATE_ID,
             dynamic_template_data: {
                 domain: process.env.WALLET_DOMAIN,
-                randId: randId
+                randId
             }
         });
     }

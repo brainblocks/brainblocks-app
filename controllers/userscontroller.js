@@ -34,9 +34,9 @@ exp.create = async (req : Object, res : Object) => {
         }
         // Ensure the recaptcha is valid
         if (!await Recaptcha.verify(recaptcha)) {
-        return error.forbidden('Invalid Recaptcha');
+            return error.forbidden('Invalid Recaptcha');
         }
-    }    
+    }
 
     // check if password is strong enough
     if (!checkPassword(password)) {
@@ -183,7 +183,7 @@ exp.addContact = async (req : Object, res : Object) => {
     } else if (req.body.username) {
         let username;
         let accName;
-        
+
         if (req.body.username.indexOf('@') !== -1) {
             let aux = req.body.username.split('@');
             accName = aux[1];
@@ -206,7 +206,7 @@ exp.addContact = async (req : Object, res : Object) => {
         }
 
         contact.BBUser = user.id;
-        
+
     } else {
         // missing params
         return res.status(400).send({ error: 'Missing address/username' });
