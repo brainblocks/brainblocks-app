@@ -25,7 +25,8 @@ services:
 
 variables:
   POSTGRES_DB: bb_dev_db
-  POSTGRES_USER: bbtest
+  POSTGRES_USER: brainblocks_dev
+  POSTGRES_PASSWORD: ""
 
 stages:
   - test
