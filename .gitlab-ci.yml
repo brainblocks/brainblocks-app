@@ -46,8 +46,6 @@ test:
     - npm install -g sequelize-cli
     - npm install
     - cp .env-example .env
-    - npm run sequelize db:drop
-    - npm run sequelize -- db:create
     - npm run sequelize -- db:migrate
     - npm run sequelize -- db:seed:all
     - npm test
