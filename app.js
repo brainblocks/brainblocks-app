@@ -23,19 +23,17 @@ if (process.env.LOGGING === 'true') {
 // enable helmet
 app.use(helmet());
 
-app.use(cors({
-    origin: process.env.WALLET_DOMAIN
-}));
+// enable cors
+// app.use(cors({
+//     origin: process.env.WALLET_DOMAIN
+// }));
+
+router.all(process.env.WALLET_DOMAIN, cors());
 
 // Sets "Referrer-Policy: same-origin".
 app.use(helmet.referrerPolicy({
     policy: 'same-origin'
 }));
-
-// app.use((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', process.env.WALLET_DOMAIN);
-//     next();
-// });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
