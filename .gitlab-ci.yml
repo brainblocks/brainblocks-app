@@ -46,6 +46,10 @@ test:
     - npm install -g sequelize-cli
     - npm install
     - cp .env-example .env
+    - sed -i 's/SENDGRID_API_KEY=""/SENDGRID_API_KEY="$SENDGRID_API_KEY"/g' .env
+    - sed -i 's/SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID=""/SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID="$SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID"/g' .env
+    - sed -i 's/GOOGLE_RECAPTCHA_SITE_KEY=""/GOOGLE_RECAPTCHA_SITE_KEY="$GOOGLE_RECAPTCHA_SITE_KEY"/g' .env
+    - sed -i 's/GOOGLE_RECAPTCHA_SECRET_KEY=""/GOOGLE_RECAPTCHA_SECRET_KEY="$GOOGLE_RECAPTCHA_SECRET_KEY"/g' .env
     - npm run sequelize -- db:migrate
     - npm run sequelize -- db:seed:all
     - npm test
