@@ -7,8 +7,6 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import helmet from 'helmet';
-import csp from 'helmet-csp';
-import bodyParser from 'body-parser';
 
 import router from './routes';
 
@@ -34,33 +32,10 @@ app.use(helmet.referrerPolicy({
     policy: 'same-origin'
 }));
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', process.env.WALLET_DOMAIN);
-    next();
-});
-
-// allow CSP violation reports
-app.use(csp({
-    directives: {
-        defaultSrc:              [ "'self'" ], // eslint-disable-line quotes
-        scriptSrc:               [ "'self'", "'unsafe-inline'" ], // eslint-disable-line quotes
-        reportUri:                '/report-violation',
-        upgradeInsecureRequests: true
-    }
-}));
-
-app.use(bodyParser.json({
-    type: [ 'json', 'application/csp-report' ]
-}));
-
-app.post('/report-violation', (req, res) => {
-    if (req.body) {
-        console.log('CSP Violation: ', req.body);
-    } else {
-        console.log('CSP Violation: No data received!');
-    }
-    res.status(204).end();
-});
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', process.env.WALLET_DOMAIN);
+//     next();
+// });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
