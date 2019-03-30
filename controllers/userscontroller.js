@@ -117,6 +117,11 @@ exp.verifyEmail = async (req : Object, res : Object) => {
     const error = new ErrorResponse(res);
     const { hash, verification } = req.body || {};
 
+    console.log('hash: ', hash);
+    console.log('verification: ', verification);
+    console.log('req hash: ', req.user.emailHash);
+    console.log('req verification: ', req.user.emailVerification);
+
     if (hash !== req.user.emailHash) {
         return error.badRequest('Could not verify email');
     }
