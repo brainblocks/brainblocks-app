@@ -21,9 +21,8 @@ if (process.env.LOGGING === 'true') {
     app.use(logger('dev'));
 }
 
-// TO DO: Update this to reflect production settings as well
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: process.env.WALLET_DOMAIN
 }));
 
 app.use(express.json());
