@@ -24,11 +24,9 @@ if (process.env.LOGGING === 'true') {
 app.use(helmet());
 
 // enable cors
-// app.use(cors({
-//     origin: process.env.WALLET_DOMAIN
-// }));
-
-router.all(process.env.WALLET_DOMAIN, cors());
+app.use(cors({
+    origin: process.env.WALLET_DOMAIN
+}));
 
 // Sets "Referrer-Policy: same-origin".
 app.use(helmet.referrerPolicy({
@@ -41,7 +39,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', router);
-
 
 if (process.env.API_ERRORS === 'true') {
     // catch 404 and forward to error handler
