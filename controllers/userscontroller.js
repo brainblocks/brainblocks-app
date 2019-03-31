@@ -2,6 +2,7 @@
 import { Op } from 'sequelize';
 
 import { checkPassword } from '../middleware/validator';
+import { checkEmail } from '../services/allowed-emails';
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
@@ -18,6 +19,10 @@ exp.create = async (req : Object, res : Object) => {
     // Validate all of the inputs
     if (!email) {
         return error.badRequest('Email is required');
+    }
+
+    if (!checkEmail(email)) {
+        return error.badRequest('Email is not allowed');
     }
 
     if (!username) {
