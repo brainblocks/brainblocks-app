@@ -32,4 +32,4 @@ class PINKey extends Sequelize.Model {
     }
 }
 
-export default TempAddress;
+export default PINKey;
