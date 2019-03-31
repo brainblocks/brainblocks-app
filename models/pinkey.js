@@ -6,7 +6,8 @@ class PINKey extends Sequelize.Model {
         return super.init(
             {
                 userId:              DataTypes.INTEGER,
-                PIN:                 DataTypes.INTEGER,
+                sessionId:           DataTypes.INTEGER,
+                PIN:                 DataTypes.STRING,
                 key:                 DataTypes.STRING,
                 expires:             DataTypes.DATE
             },

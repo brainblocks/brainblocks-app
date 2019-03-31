@@ -18,7 +18,7 @@ export default  {
                 allowNull: false
             },
             PIN: {
-                type:      Sequelize.INTEGER,
+                type:      Sequelize.STRING,
                 allowNull: false
             },
             key: {

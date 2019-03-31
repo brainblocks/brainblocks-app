@@ -114,7 +114,7 @@ export default class {
             PIN,
             key,
             sessionId: req.token.id
-        }).then((pinkey) => {
+        }).then((pinKey) => {
             success.send({
                 PIN: pinKey.PIN,
                 key: pinKey.key
@@ -139,8 +139,8 @@ export default class {
             }
         };
 
-        if (req.body.PIN) {
-            where.PIN = req.body.PIN;
+        if (req.params.PIN) {
+            where.PIN = req.params.PIN;
         }
 
         let pinKeys = await PINKey.findAll({
@@ -152,19 +152,19 @@ export default class {
         }
 
         let formatted = {};
-        for (pinKey of pinKeys) {
+        for (let pinKey of pinKeys) {
             formatted[pinKey.PIN] = {
                 key: pinKey.key,
                 PIN: pinKey.PIN
             };
         }
 
-        if (req.body.PIN) {
-            return success.send(formatted);
+        if (req.params.PIN) {
+            return success.send({ pinKeys: formatted });
         } else {
             // return all pins if session is not older than 30 minutes
-            if (req.token.created_at.getTime() + 30 * 60 * 1000 < Date.now()) {
-                return success.send(formatted);
+            if (req.token.createdAt.getTime() + 30 * 60 * 1000 > Date.now()) {
+                return success.send({ pinKeys: formatted });
             }
             return error.badRequest('PIN code is missing or session is older than 30 minutes.');
         }
