@@ -21,6 +21,7 @@ import LoginLog from './loginlog';
 import PasswordReset from './passwordreset';
 import UserToken from './usertoken';
 import Contact from './contact';
+import PINKey from './pinkey';
 
 const env = process.env.NODE_ENV || 'development';
 const config = conf[env];
@@ -49,7 +50,8 @@ const models = {
     LoginLog:              LoginLog.init(sequelize, Sequelize),
     PasswordReset:         PasswordReset.init(sequelize, Sequelize),
     UserToken:             UserToken.init(sequelize, Sequelize),
-    Contact:               Contact.init(sequelize, Sequelize)
+    Contact:               Contact.init(sequelize, Sequelize),
+    PINKey:                PINKey.init(sequelize, Sequelize)
 };
 
 Object.values(models)
