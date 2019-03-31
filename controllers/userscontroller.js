@@ -21,7 +21,7 @@ exp.create = async (req : Object, res : Object) => {
         return error.badRequest('Email is required');
     }
 
-    if (!checkEmail(email)) {
+    if ((process.env.EMAIL_CHECK === 'true') && !checkEmail(email)) {
         return error.badRequest('Registration for this email is not allowed');
     }
 
