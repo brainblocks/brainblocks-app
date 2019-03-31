@@ -129,7 +129,7 @@ export default class User extends Sequelize.Model {
             return User.findOne({ where: {
                 UUID: decoded.uuid
             } }).then((user) => {
-                return [user, found];
+                return [ user, found ];
             });
         });
     }

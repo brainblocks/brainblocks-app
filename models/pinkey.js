@@ -28,8 +28,9 @@ class PINKey extends Sequelize.Model {
     }
 
     static beforeCreate(pinKey : self) {
-        if (!pinKey.expires)
-            pinKey.expires = new Date(Date.now() + 30 * 60 * 1000) // 30 minutes by default
+        if (!pinKey.expires) {
+            pinKey.expires = new Date((Date.now() + 30) * 60 * 1000); // 30 minutes by default
+        }
     }
 }
 

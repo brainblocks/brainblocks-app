@@ -1,12 +1,12 @@
 /* @flow */
+import crypto from 'crypto';
+
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
 
-import crypto from 'crypto';
-
 const { Vault, PINKey } = models.models;
-const Op = models.Sequelize.Op
+const Op = models.Sequelize.Op;
 
 export default class {
 
@@ -91,7 +91,7 @@ export default class {
 
         let pinKey = await PINKey.findOne({
             where: {
-                userId: user.id,
+                userId:    user.id,
                 sessionId: req.token.id,
                 PIN
             }
@@ -99,7 +99,7 @@ export default class {
 
         if (pinKey) {
             // already exists a key for this session under this PIN, update it and return it
-            pinKey.expires = new Date(Date.now() + 30 * 60 * 1000);
+            pinKey.expires = new Date((Date.now() + 30) * 60 * 1000);
             pinKey.key = key;
             pinKey.save();
             return success.send({
@@ -110,14 +110,14 @@ export default class {
 
         // doesnt exist, create one
         PINKey.create({
-            userId: user.id,
+            userId:    user.id,
             PIN,
             key,
             sessionId: req.token.id
-        }).then((pinKey) => {
+        }).then((newPinKey) => {
             success.send({
-                PIN: pinKey.PIN,
-                key: pinKey.key
+                PIN: newPinKey.PIN,
+                key: newPinKey.key
             });
         }).catch((err) => {
             console.error('Error generating pinKey ', err);
@@ -132,9 +132,10 @@ export default class {
         let user = req.user;
 
         let where = {
-            userId: user.id,
+            userId:    user.id,
             sessionId: req.token.id,
-            expires: {
+            PIN:       null,
+            expires:   {
                 [Op.gt]: new Date()
             }
         };
@@ -147,7 +148,7 @@ export default class {
             where
         });
 
-        if (pinKeys.length == 0) {
+        if (pinKeys.length === 0) {
             return error.notFound('No active pinKeys found');
         }
 
@@ -163,8 +164,8 @@ export default class {
             return success.send({ pinKeys: formatted });
         } else {
             // return all pins if session is not older than 30 minutes
-            if (req.token.createdAt.getTime() + 30 * 60 * 1000 > Date.now()) {
-                return success.send({ pinKeys: formatted });
+            if ((req.token.createdAt.getTime() + 30) * 60 * 1000 > Date.now()) {
+                return success.send({ pinKeys: formatted });
             }
             return error.badRequest('PIN code is missing or session is older than 30 minutes.');
         }
