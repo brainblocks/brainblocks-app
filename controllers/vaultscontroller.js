@@ -83,6 +83,8 @@ export default class {
     }
 
     static async createPINKey(req : Object, res : Object) : Object {
+        let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
         let user = req.user;
         let PIN = req.body.PIN;
         let key = crypto.randomBytes(32).toString('hex');
@@ -125,6 +127,8 @@ export default class {
     }
 
     static async getPINKey(req : Object, res : Object) : Object {
+        let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
         let user = req.user;
 
         let where = {
@@ -139,23 +143,14 @@ export default class {
             where.PIN = req.body.PIN;
         }
 
-        // not searching by pin code too because it is not needed if session is not older than 30 minutes
         let pinKeys = await PINKey.findAll({
-            where: {
-                userId: user.id,
-                sessionId: req.token.id,
-                expires: {
-                    [Op.gt]: new Date()
-                }
-            }
+            where
         });
 
         if (pinKeys.length == 0) {
             return error.notFound('No active pinKeys found');
         }
 
-        // if session is not older than 30 minutes return key without checking pin, unless it's in the request
-        let ret = [];
         let formatted = {};
         for (pinKey of pinKeys) {
             formatted[pinKey.PIN] = {
@@ -165,12 +160,13 @@ export default class {
         }
 
         if (req.body.PIN) {
-            return success.send({ [req.body.PIN]: formatted[PIN] });
-        } else {
-            // return all pins
             return success.send(formatted);
+        } else {
+            // return all pins if session is not older than 30 minutes
+            if (req.token.created_at.getTime() + 30 * 60 * 1000 < Date.now()) {
+                return success.send(formatted);
+            }
+            return error.badRequest('PIN code is missing or session is older than 30 minutes.');
         }
     }
-
-    
 }
