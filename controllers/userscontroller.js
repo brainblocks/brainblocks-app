@@ -22,7 +22,7 @@ exp.create = async (req : Object, res : Object) => {
     }
 
     if (!checkEmail(email)) {
-        return error.badRequest('Email is not allowed');
+        return error.badRequest('Registration for this email is not allowed');
     }
 
     if (!username) {
