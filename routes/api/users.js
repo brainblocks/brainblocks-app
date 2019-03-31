@@ -24,6 +24,8 @@ router.patch('/contacts/:contactId', authenticate, validate, UsersController.upd
 router.get('/vault', authenticate, validate, VaultsController.get);
 router.post('/vault', authenticate, validate, VaultsController.create);
 router.patch('/vault', authenticate, validate, VaultsController.update);
+router.get('/vault/pinkey', authenticate, validate, VaultsController.getPINKey);
+router.post('/vaults/pinkey', authenticate, vaidate, VaultsController.createPINKey);
 
 router.post('/2fa', authenticate, UsersController.set2fa);
 router.post('/2fa/confirm', authenticate, UsersController.confirm2fa);

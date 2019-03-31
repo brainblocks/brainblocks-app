@@ -82,7 +82,7 @@ export default class {
         }
     }
 
-    static async getNewPINKey(req : Object, res : Object) : Object {
+    static async createPINKey(req : Object, res : Object) : Object {
         let user = req.user;
         let PIN = req.body.PIN;
         let key = crypto.randomBytes(32).toString('hex');
