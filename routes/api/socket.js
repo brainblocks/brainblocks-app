@@ -10,7 +10,13 @@ let router = express.Router();
 const port = process.env.WS_PORT;
 const wss = new WebSocket.Server({ port });
 
+// websocket subscriber map
 let subscriptionMap = {};
+
+// tps reporting
+let tpsCount = 0;
+// Seconds between reporting statistics to console (Connected clients, TPS)
+const statTime = 10;
 
 function ping(ws) {
     const time = Date.now();
@@ -136,6 +142,9 @@ router.post('/new-block/:key/submit', async (req, res) => {
     let fullBlock = req.body;
     let { key } = req.params;
 
+    // increase tps counter
+    tpsCount = tpsCount += 1;
+
     if (key !== 'Ndr0ki0JKdByHeaRBB0FynD0U6N8v1433axWrl5') {
         return res.status(403).send({ error: 'Client is rejected!' });
     }
@@ -227,5 +236,14 @@ wss.on('connection', (ws) => {
         }
     });
 });
+
+function printStats() {
+    const connectedClients = wss.clients.length;
+    const tps = tpsCount / statTime;
+    console.log(`[Stats] Connected clients: ${ connectedClients }; TPS Average: ${ tps }`);
+    tpsCount = 0;
+}
+
+setInterval(printStats, statTime * 1000); // Print stats every x seconds
 
 export default router;
