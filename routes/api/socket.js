@@ -12,6 +12,15 @@ const wss = new WebSocket.Server({ port });
 
 let subscriptionMap = {};
 
+function ping(ws) {
+    const time = Date.now();
+    const event = {
+        event: 'pong',
+        data:  time
+    };
+    ws.send(JSON.stringify(event));
+}
+
 function subscribeAccounts(ws, accounts) {
     for (let account of accounts) {
         if (ws.subscriptions.indexOf(account) !== -1) {
@@ -112,6 +121,9 @@ function parseEvent(ws, event) {
         break;
     case 'pending':
         getPendingBlocks(ws, accounts);
+        break;
+    case 'ping':
+        ping(ws);
         break;
     default:
         break;
