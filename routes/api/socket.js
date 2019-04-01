@@ -157,6 +157,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
 
     let destinations = [];
 
+    /* All block types
     if (fullBlock.block.type === 'state') {
         if (fullBlock.is_send === 'true' && fullBlock.block.link_as_account) {
             destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
@@ -167,6 +168,13 @@ router.post('/new-block/:key/submit', async (req, res) => {
         // push to destinations array
         destinations.push(fullBlock.block.destination.replace('xrb_', 'nano_'));
     }
+    */
+
+    /* For now, only sends where we are the recipient */
+    if (fullBlock.block.type !== 'state' || fullBlock.is_send !== 'true') {
+        return;
+    }
+    destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
 
     // Send it to all!
     for (let destination of destinations) {
