@@ -7,7 +7,8 @@ import { getInfo, getPending } from '../../services/nano-node';
 
 let router = express.Router();
 
-const wss = new WebSocket.Server({ port: 3019 });
+const port = process.env.WS_PORT;
+const wss = new WebSocket.Server({ port });
 
 let subscriptionMap = {};
 
