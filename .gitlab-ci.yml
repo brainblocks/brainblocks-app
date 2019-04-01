@@ -1,0 +1,74 @@
+# node.js docker image
+image: node:latest
+
+before_script:
+  ## Install ssh-agent if not already installed, it is required by Docker.
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+
+  # Run ssh-agent (inside the build environment)
+  - eval $(ssh-agent -s)
+
+  # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+
+  # Create the SSH directory and give it the right permissions
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+
+  # Use ssh-keyscan to scan the keys of your private server.
+  - ssh-keyscan ssh.node1.brainblocks.io >> ~/.ssh/known_hosts
+  - ssh-keyscan git.brainblocks.io >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: bb_dev_db
+  POSTGRES_USER: brainblocks_dev
+  POSTGRES_PASSWORD: ""
+
+stages:
+  - test
+  - staging
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+test:
+  stage: test
+  script:
+    - apt update
+    - apt-get install -yq postgresql postgresql-client libpq-dev
+    - npm install -g npm
+    - npm install -g sequelize-cli
+    - npm install
+    - cp .env-example .env
+    - sed -i 's/SENDGRID_API_KEY=""/SENDGRID_API_KEY="$SENDGRID_API_KEY"/g' .env
+    - sed -i 's/SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID=""/SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID="$SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID"/g' .env
+    - sed -i 's/GOOGLE_RECAPTCHA_SITE_KEY=""/GOOGLE_RECAPTCHA_SITE_KEY="$GOOGLE_RECAPTCHA_SITE_KEY"/g' .env
+    - sed -i 's/GOOGLE_RECAPTCHA_SECRET_KEY=""/GOOGLE_RECAPTCHA_SECRET_KEY="$GOOGLE_RECAPTCHA_SECRET_KEY"/g' .env
+    - npm run sequelize -- db:migrate
+    - npm run sequelize -- db:seed:all
+    - npm test
+  artifacts:
+    paths:
+      - node_modules/
+
+staging:
+  stage: staging
+  only:
+    refs:
+      - develop
+  script:
+    - ssh brainblocks@ssh.node1.brainblocks.io "cd /home/brainblocks/staging/app && git stash && git pull https://git.brainblocks.io/brainblocks/brainblocks-app.git && npm install && pm2 restart staging-app"
+
+deploy:
+  stage: deploy
+  only:
+    refs:
+      - master
+  script:
+    - ssh brainblocks@ssh.node1.brainblocks.io "cd /home/brainblocks/app && git stash && git pull https://git.brainblocks.io/brainblocks/brainblocks-app.git && npm install && pm2 restart app"

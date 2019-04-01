@@ -1,6 +1,7 @@
 // no lint here, es6 breaks sequelize-cli
-
-const config = require('dotenv').config();
+if(!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+    require('dotenv').config();
+}
 
 module.exports = {
     development: {

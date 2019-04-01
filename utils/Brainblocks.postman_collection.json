@@ -1,0 +1,277 @@
+{
+	"info": {
+		"_postman_id": "7e35e612-de5a-4785-bf0c-3b4507a7e3d7",
+		"name": "Brainblocks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"miquel\",\n\"password\": \"blabla1\"}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/auth/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login + 2FA",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"email\": \"mochatest@mochatest.fave\", \n\"password\": \"mochatestpassword\",\n\"token2fa\": \"019804\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/auth/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set2fa",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"name": "Content-Type",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXVpZCI6IjE1MmJmZWIzLWI0OTAtNDVkZS1hMTc1LThlNTA4Y2YzYTcyNCIsInR5cGUiOiJhdXRoIiwiZXhwaXJlcyI6IjMwMDAtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImlhdCI6MTU0NzE1MjE2MX0.pWRvx6N2dBvJoWNJB6fNW9UYUL47iUgrnDIcPzEJ_OI",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXVpZCI6IjE1MmJmZWIzLWI0OTAtNDVkZS1hMTc1LThlNTA4Y2YzYTcyNCIsInR5cGUiOiJhdXRoIiwiZXhwaXJlcyI6IjMwMDAtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImlhdCI6MTU0NzE1MjE2MX0.pWRvx6N2dBvJoWNJB6fNW9UYUL47iUgrnDIcPzEJ_OI"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "localhost:8080/api/users/2fa",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"2fa"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm2fa",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"name": "Content-Type",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXVpZCI6IjE1MmJmZWIzLWI0OTAtNDVkZS1hMTc1LThlNTA4Y2YzYTcyNCIsInR5cGUiOiJhdXRoIiwiZXhwaXJlcyI6IjMwMDAtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImlhdCI6MTU0NzE1MjE2MX0.pWRvx6N2dBvJoWNJB6fNW9UYUL47iUgrnDIcPzEJ_OI",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"token2fa\": \"543602\" }"
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/2fa/confirm",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"2fa",
+						"confirm"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete2fa",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"name": "Content-Type",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXVpZCI6IjE1MmJmZWIzLWI0OTAtNDVkZS1hMTc1LThlNTA4Y2YzYTcyNCIsInR5cGUiOiJhdXRoIiwiZXhwaXJlcyI6IjMwMDAtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImlhdCI6MTU0NzE1MjE2MX0.pWRvx6N2dBvJoWNJB6fNW9UYUL47iUgrnDIcPzEJ_OI",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"token2fa\": \"642814\" }"
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/2fa",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"2fa"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"miquel\",\n\t\"email\": \"miquel@blabla.com\", \n\"password\": \"blabla\"}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IpAuth",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"randId\": \"1f5a688b8c5cce3a9d67017a66aac423f5e60db\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/rpc/ipauth",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"rpc",
+						"ipauth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Pwd",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXVpZCI6ImFiNGZjMTU0LTdiNjQtNGQzNS1iNmY0LTE4MGQzZTFiMmQ4ZCIsInR5cGUiOiJhdXRoIiwiZXhwaXJlcyI6IjIwMTktMDQtMjVUMTY6NDM6MTUuMzM1WiIsImlhdCI6MTU1MzgwNTQwOX0.Cq9oeILvrOdRLCN0Ci2ohEcMI1vt6ylJMD_PcryNmAQ",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"password\": \"blabla1\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/api/auth/validatepwd",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"validatepwd"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

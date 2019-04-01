@@ -8,9 +8,10 @@
     "flow": "flow",
     "lint": "eslint controllers/ routes/ migrations/ models/ config/ test/ *.js",
     "test": "npm run lint && npm run flow && LOGGING=false mocha --timeout 5000 --require babel-register --exit test/index.js",
-    "sequelize": "babel-node ./node_modules/.bin/sequelize $*"
+    "sequelize": "babel-node ./node_modules/.bin/sequelize"
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.3.1",
     "async": "^2.6.1",
     "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
@@ -25,12 +26,14 @@
     "dotenv": "^6.0.0",
     "express": "~4.16.0",
     "grumbler-scripts": "^2.0.74",
+    "helmet": "^3.16.0",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.3.0",
     "morgan": "~1.9.0",
     "nodemon": "^1.18.7",
     "normalize-strings": "^1.1.0",
+    "otplib": "^10.0.1",
     "password-validator": "^4.1.1",
     "pg": "^7.5.0",
     "pg-hstore": "^2.3.2",
@@ -38,14 +41,18 @@
     "sequelize": "^4.39.0",
     "sequelize-cli": "^4.1.1",
     "uuid": "^3.3.2",
-    "validator": "^10.8.0"
+    "validator": "^10.8.0",
+    "ws": "^6.2.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
+    "big-integer": "^1.6.42",
     "eslint-plugin-flowtype": "^2.50.3",
     "flow-bin": "^0.82.0",
     "flow-remove-types": "^1.2.3",
     "mocha": "^5.2.0",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "supertest": "^3.3.0"
   }
 }

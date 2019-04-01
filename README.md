@@ -17,13 +17,15 @@ Following which, edit the database settings in `.env`. You should update the use
 
 Once done, run these commands:
 
+**NOTE:** If the DB already exists and has to be regenerated from scratch for some reason, run `npm run sequelize db:drop` first (CAUTION - THIS DROPS THE WHOLE DB).
+
 ```
-npm run sequelize db:create
-npm run sequelize db:migrate
-npm run sequelize db:seed:all
+npm run sequelize -- db:create
+npm run sequelize -- db:migrate
+npm run sequelize -- db:seed:all
 ```
 
-**NOTE:** Some sequelize cli commands may not work as expected (or not work at all) because of the change to es6. For example, `npm run sequelize model:generate`. The db ones work fine though :)
+**NOTE:** Some sequelize cli commands may not work as expected (or not work at all) because of the change to es6. For example, `npm run sequelize -- model:generate`. The db ones work fine though :)
 
 
 ## Config

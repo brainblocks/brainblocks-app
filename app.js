@@ -6,6 +6,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
+import helmet from 'helmet';
 
 import router from './routes';
 
@@ -19,9 +20,17 @@ if (process.env.LOGGING === 'true') {
     app.use(logger('dev'));
 }
 
-// TO DO: Update this to reflect production settings as well
+// enable helmet
+app.use(helmet());
+
+// enable cors
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: process.env.WALLET_DOMAIN
+}));
+
+// Sets "Referrer-Policy: same-origin".
+app.use(helmet.referrerPolicy({
+    policy: 'same-origin'
 }));
 
 app.use(express.json());
@@ -31,20 +40,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', router);
 
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-    next(createError(404));
-});
+if (process.env.API_ERRORS === 'true') {
+    // catch 404 and forward to error handler
+    app.use((req, res, next) => {
+        next(createError(404));
+    });
 
-// error handler
-app.use((err, req, res) => {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // error handler
+    app.use((err, req, res) => {
+        // set locals, only providing error in development
+        res.locals.message = err.message;
+        res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    // render the error page
-    res.status(err.status || 500);
-    res.render('error');
-});
+        // render the error page
+        res.status(err.status || 500);
+        res.render('error');
+    });
+}
 
 export default app;
