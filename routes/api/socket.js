@@ -168,9 +168,9 @@ router.post('/new-block/:key/submit', async (req, res) => {
         for (let ws of subscriptionMap[destination]) {
             const hash = fullBlock.hash;
             const nodeBlock = await getInfo(hash);
-            const data = { accounts: { } };
-            let blockObject = {};
             const account = nodeBlock.block_account;
+            let data = { accounts: { } };
+            let blockObject = {};
 
             blockObject.amount = nodeBlock.amount;
             blockObject.from = account;
@@ -180,7 +180,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
             accountObject.account = account;
             accountObject.blocks = [ blockObject ];
 
-            res.accounts[account] = accountObject;
+            data.accounts[account] = accountObject;
 
             const event = {
                 event: 'newBlock',
