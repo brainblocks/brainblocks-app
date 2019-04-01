@@ -10,7 +10,13 @@ let router = express.Router();
 const port = process.env.WS_PORT;
 const wss = new WebSocket.Server({ port });
 
+// websocket subscriber map
 let subscriptionMap = {};
+
+// tps reporting
+let tpsCount = 0;
+// Seconds between reporting statistics to console (Connected clients, TPS)
+const statTime = 10;
 
 function ping(ws) {
     const time = Date.now();
@@ -109,8 +115,10 @@ async function getPendingBlocks(ws, accounts) : Promise<void> {
 
 function parseEvent(ws, event) {
     let accounts = [];
-    for (let account of event.data) {
-        accounts.push(account.replace('xrb_', 'nano_'));
+    if (event.hasOwnProperty('data') && Array.isArray(event.data)) {
+        for (let account of event.data) {
+            accounts.push(account.replace('xrb_', 'nano_'));
+        }
     }
     switch (event.event) {
     case 'subscribe':
@@ -133,6 +141,9 @@ function parseEvent(ws, event) {
 router.post('/new-block/:key/submit', async (req, res) => {
     let fullBlock = req.body;
     let { key } = req.params;
+
+    // increase tps counter
+    tpsCount = tpsCount += 1;
 
     if (key !== 'Ndr0ki0JKdByHeaRBB0FynD0U6N8v1433axWrl5') {
         return res.status(403).send({ error: 'Client is rejected!' });
@@ -168,19 +179,19 @@ router.post('/new-block/:key/submit', async (req, res) => {
         for (let ws of subscriptionMap[destination]) {
             const hash = fullBlock.hash;
             const nodeBlock = await getInfo(hash);
-            const account = nodeBlock.block_account;
+            const fromAccount = nodeBlock.block_account;
             let data = { accounts: { } };
             let blockObject = {};
 
             blockObject.amount = nodeBlock.amount;
-            blockObject.from = account;
+            blockObject.from = fromAccount;
             blockObject.hash = hash;
 
             let accountObject = {};
-            accountObject.account = account;
+            accountObject.account = destination;
             accountObject.blocks = [ blockObject ];
 
-            data.accounts[account] = accountObject;
+            data.accounts[destination] = accountObject;
 
             const event = {
                 event: 'newBlock',
@@ -225,5 +236,14 @@ wss.on('connection', (ws) => {
         }
     });
 });
+
+function printStats() {
+    const connectedClients = wss.clients.size;
+    const tps = tpsCount / statTime;
+    console.log(`[Stats] Connected clients: ${ connectedClients }; TPS Average: ${ tps }`);
+    tpsCount = 0;
+}
+
+setInterval(printStats, statTime * 1000); // Print stats every x seconds
 
 export default router;
