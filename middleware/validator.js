@@ -91,7 +91,7 @@ export function checkDate(date : mixed, beforeThan : ?Date, afterThan : ?Date) :
 // eslint-disable-next-line complexity
 export function validate(req : Object, res : Object, next : Function) : mixed {
     if (req.body.username) {
-        if (!checkUsername(req.body.username)) {
+        if (!checkUsername(req.body.username) && (req.body.username !== 'ty')) { // enabled ty's username
             return res.status(400).send({ error: 'Invalid username' });
         }
     }
