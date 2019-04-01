@@ -109,8 +109,10 @@ async function getPendingBlocks(ws, accounts) : Promise<void> {
 
 function parseEvent(ws, event) {
     let accounts = [];
-    for (let account of event.data) {
-        accounts.push(account.replace('xrb_', 'nano_'));
+    if (event.hasOwnProperty('data') && Array.isArray(event.data)) {
+        for (let account of event.data) {
+            accounts.push(account.replace('xrb_', 'nano_'));
+        }
     }
     switch (event.event) {
     case 'subscribe':
