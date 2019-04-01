@@ -7,9 +7,19 @@ import { getInfo, getPending } from '../../services/nano-node';
 
 let router = express.Router();
 
-const wss = new WebSocket.Server({ port: 3019 });
+const port = process.env.WS_PORT;
+const wss = new WebSocket.Server({ port });
 
 let subscriptionMap = {};
+
+function ping(ws) {
+    const time = Date.now();
+    const event = {
+        event: 'pong',
+        data:  time
+    };
+    ws.send(JSON.stringify(event));
+}
 
 function subscribeAccounts(ws, accounts) {
     for (let account of accounts) {
@@ -112,6 +122,9 @@ function parseEvent(ws, event) {
     case 'pending':
         getPendingBlocks(ws, accounts);
         break;
+    case 'ping':
+        ping(ws);
+        break;
     default:
         break;
     }
@@ -155,9 +168,9 @@ router.post('/new-block/:key/submit', async (req, res) => {
         for (let ws of subscriptionMap[destination]) {
             const hash = fullBlock.hash;
             const nodeBlock = await getInfo(hash);
-            const data = { accounts: { } };
-            let blockObject = {};
             const account = nodeBlock.block_account;
+            let data = { accounts: { } };
+            let blockObject = {};
 
             blockObject.amount = nodeBlock.amount;
             blockObject.from = account;
@@ -167,7 +180,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
             accountObject.account = account;
             accountObject.blocks = [ blockObject ];
 
-            res.accounts[account] = accountObject;
+            data.accounts[account] = accountObject;
 
             const event = {
                 event: 'newBlock',
