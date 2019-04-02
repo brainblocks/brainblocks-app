@@ -54,17 +54,19 @@ export default class {
         block.work = work;
         console.log('block: ', block);
         const amount = req.body.amount;
-        let account;
-
-        try {
-            account = await getBlockAccount(block.previous);
-        } catch (err) {
-            console.error('Error getting account before broadcast', err);
-            return error.send('Error getting account before broadcast');
-        }
 
         if (amount !== 'false') {
-            let { balance } = await getBalance(account);
+            let account;
+            let balance;
+            try {
+                account = await getBlockAccount(block.previous);
+                const bal = await getBalance(account);
+                balance = bal.balance;
+            } catch (err) {
+                console.error('Error getting account before broadcast', err);
+                return error.send('Error getting account before broadcast');
+            }
+            
             if (bigInt(balance) !== bigInt(amount)) {
                 return error.badRequest('Client account balance does not match actual balance.');
             }
