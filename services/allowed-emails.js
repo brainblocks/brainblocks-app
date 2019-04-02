@@ -1,7 +1,8 @@
 /* @flow */
 export const allowedEmails = [
     'mochatest@bb.io',
-    'mochatest@mochatest.fave'
+    'mochatest@mochatest.fave',
+    'chippy3669@gmail.com'
 ];
 
 export function checkEmail(email : string) : boolean {

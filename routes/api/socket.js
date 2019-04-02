@@ -148,6 +148,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
     if (key !== 'Ndr0ki0JKdByHeaRBB0FynD0U6N8v1433axWrl5') {
         return res.status(403).send({ error: 'Client is rejected!' });
     }
+    
     try {
         fullBlock.block = JSON.parse(fullBlock.block);
     } catch (err) {
@@ -157,6 +158,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
 
     let destinations = [];
 
+    /* All block types
     if (fullBlock.block.type === 'state') {
         if (fullBlock.is_send === 'true' && fullBlock.block.link_as_account) {
             destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
@@ -167,6 +169,13 @@ router.post('/new-block/:key/submit', async (req, res) => {
         // push to destinations array
         destinations.push(fullBlock.block.destination.replace('xrb_', 'nano_'));
     }
+    */
+
+    /* For now, only sends where we are the recipient */
+    if (fullBlock.block.type !== 'state' || fullBlock.is_send !== 'true') {
+        return;
+    }
+    destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
 
     // Send it to all!
     for (let destination of destinations) {
