@@ -1,11 +1,13 @@
 /* @flow */
-export const allowedEmails = [
-    'mochatest@bb.io',
-    'mochatest@mochatest.fave',
-    'chippy3669@gmail.com'
-];
-
 export function checkEmail(email : string) : boolean {
+    let allowedEmails = process.env.EMAILS;
+
+    if (!allowedEmails) {
+        return false;
+    } else {
+        allowedEmails = allowedEmails.split(',');
+    }
+    
     // Find the our `@` delimiter
     let delimiterIndex = email.indexOf('@');
 
