@@ -148,6 +148,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
     if (key !== 'Ndr0ki0JKdByHeaRBB0FynD0U6N8v1433axWrl5') {
         return res.status(403).send({ error: 'Client is rejected!' });
     }
+    
     try {
         fullBlock.block = JSON.parse(fullBlock.block);
     } catch (err) {
