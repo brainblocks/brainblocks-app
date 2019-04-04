@@ -18,11 +18,40 @@ let tpsCount = 0;
 // Seconds between reporting statistics to console (Connected clients, TPS)
 const statTime = 10;
 
-function ping(ws) {
-    const time = Date.now();
+async function getPendingBlocks(ws, accounts) : Promise<void> {
+    if (!accounts) {
+        const event = {
+            event: 'error',
+            data:  'Invalid Pending Request. Missing Accounts'
+        };
+        ws.send(JSON.stringify(event));
+        return;
+    }
+
+    let subAccounts = [];
+
+    // check to make sure all accounts provided are subscribed and reject those that are not
+    for (let account of accounts) {
+        const existingSub = ws.subscriptions.indexOf(account);
+        if (existingSub === -1) {
+            const event = {
+                event: 'error',
+                data:  'Account Not Subscribed!'
+            };
+            ws.send(JSON.stringify(event));
+            return; // Not subscribed
+        } else {
+            subAccounts.push(account);
+        }
+    }
+
+    // grab pending blocks here
+    let blockData = await getPending(accounts);
+
+    // create a new event that we can send to our client
     const event = {
-        event: 'pong',
-        data:  time
+        event: 'newBlock',
+        data:  blockData
     };
     ws.send(JSON.stringify(event));
 }
@@ -34,6 +63,7 @@ function subscribeAccounts(ws, accounts) {
         }
         ws.subscriptions.push(account);
 
+        console.log('subscribed', account);
         // notify the user they are subscribed
         const event = {
             event: 'subscribed',
@@ -75,44 +105,6 @@ function unsubscribeAccounts(ws, accounts) {
     }
 }
 
-async function getPendingBlocks(ws, accounts) : Promise<void> {
-    if (!accounts) {
-        const event = {
-            event: 'error',
-            data:  'Invalid Pending Request. Missing Accounts'
-        };
-        ws.send(JSON.stringify(event));
-        return;
-    }
-
-    let subAccounts = [];
-
-    // check to make sure all accounts provided are subscribed and reject those that are not
-    for (let account of accounts) {
-        const existingSub = ws.subscriptions.indexOf(account);
-        if (existingSub === -1) {
-            const event = {
-                event: 'error',
-                data:  'Account Not Subscribed!'
-            };
-            ws.send(JSON.stringify(event));
-            return; // Not subscribed
-        } else {
-            subAccounts.push(account);
-        }
-    }
-
-    // grab pending blocks here
-    let blockData = await getPending(accounts);
-
-    // create a new event that we can send to our client
-    const event = {
-        event: 'newBlock',
-        data:  blockData
-    };
-    ws.send(JSON.stringify(event));
-}
-
 function parseEvent(ws, event) {
     let accounts = [];
     if (event.hasOwnProperty('data') && Array.isArray(event.data)) {
@@ -130,9 +122,6 @@ function parseEvent(ws, event) {
     case 'pending':
         getPendingBlocks(ws, accounts);
         break;
-    case 'ping':
-        ping(ws);
-        break;
     default:
         break;
     }
@@ -148,7 +137,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
     if (key !== 'Ndr0ki0JKdByHeaRBB0FynD0U6N8v1433axWrl5') {
         return res.status(403).send({ error: 'Client is rejected!' });
     }
-    
+
     try {
         fullBlock.block = JSON.parse(fullBlock.block);
     } catch (err) {
@@ -246,11 +235,25 @@ wss.on('connection', (ws) => {
     });
 });
 
+function ping() {
+    for (let destination of Object.keys(subscriptionMap)) {
+        for (let ws of subscriptionMap[destination]) {
+            const time = Date.now();
+            const event = {
+                event: 'ping',
+                data:  time
+            };
+            ws.send(JSON.stringify(event));
+        }
+    }
+}
+
 function printStats() {
     const connectedClients = wss.clients.size;
     const tps = tpsCount / statTime;
     console.log(`[Stats] Connected clients: ${ connectedClients }; TPS Average: ${ tps }`);
     tpsCount = 0;
+    ping();
 }
 
 setInterval(printStats, statTime * 1000); // Print stats every x seconds
