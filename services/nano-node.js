@@ -39,7 +39,8 @@ export async function wait(ms : number) : Promise<void> {
 
 export async function nanoAction<R : Object>(action : string, args : Object = {}) : Promise<R> {
 
-    console.log((new Date()).toUTCString(), 'START', action, args);
+    // for debug only, this fills logs
+    // console.log((new Date()).toUTCString(), 'START', action, args);
 
     let res;
     let body = JSON.stringify({
@@ -73,7 +74,8 @@ export async function nanoAction<R : Object>(action : string, args : Object = {}
         });
     }
 
-    console.log((new Date()).toUTCString(), 'COMPLETE', action, args, res.body);
+    // for debug only, this fills logs
+    // console.log((new Date()).toUTCString(), 'COMPLETE', action, args, res.body);
 
     if (res.statusCode !== 200) {
         throw new Error(`Expected status to be 200, got ${ res.statusCode } for action: ${ action }`);
