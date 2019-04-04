@@ -235,15 +235,24 @@ wss.on('connection', (ws) => {
     });
 });
 
-function ping() {
+function ping(ws) {
+    // send ping to destination
+    const time = Date.now();
+    const event = {
+        event: 'ping',
+        data:  time
+    };
+    ws.send(JSON.stringify(event));
+}
+
+function pulse() {
     for (let destination of Object.keys(subscriptionMap)) {
         for (let ws of subscriptionMap[destination]) {
-            const time = Date.now();
-            const event = {
-                event: 'ping',
-                data:  time
-            };
-            ws.send(JSON.stringify(event));
+            // send ping to destination
+            ping(ws);
+
+            // send pending blocks for destination
+            getPendingBlocks(ws, [ destination ]);
         }
     }
 }
@@ -253,7 +262,7 @@ function printStats() {
     const tps = tpsCount / statTime;
     console.log(`[Stats] Connected clients: ${ connectedClients }; TPS Average: ${ tps }`);
     tpsCount = 0;
-    ping();
+    pulse();
 }
 
 setInterval(printStats, statTime * 1000); // Print stats every x seconds
