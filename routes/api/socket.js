@@ -245,14 +245,25 @@ function ping(ws) {
     ws.send(JSON.stringify(event));
 }
 
-function pulse() {
+async function pulse() : Promise<void> {
+    // pull pending for accounts
+    const accounts = Object.keys(subscriptionMap);
+    const blockData = await getPending(accounts);
+    const blockAccounts = blockData.accounts;
+
     for (let destination of Object.keys(subscriptionMap)) {
         for (let ws of subscriptionMap[destination]) {
             // send ping to destination
             ping(ws);
 
-            // send pending blocks for destination
-            getPendingBlocks(ws, [ destination ]);
+            // send pending blocks to user
+            let dataObject = { accounts: {} };
+            dataObject.accounts[destination] = blockAccounts[destination];
+            const event = {
+                event: 'newBlock',
+                data:  dataObject
+            };
+            ws.send(JSON.stringify(event));
         }
     }
 }
