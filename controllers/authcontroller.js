@@ -132,7 +132,7 @@ export default class {
         }
 
         // Check if IP authorized
-        if (process.env.ENFORCE_IP_AUTH === 'true') {
+        if (process.env.ENFORCE_IP_AUTH === 'true' && user.ipAuthEnabled) {
             const checkIp = await AuthorizedIp.findOne({
                 where: { 'userId': loginInfo.userId, 'ip': loginInfo.ip, 'authorized': true }
             });

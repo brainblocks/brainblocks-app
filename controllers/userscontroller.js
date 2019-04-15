@@ -1,4 +1,6 @@
 /* @flow */
+import crypto from 'crypto';
+
 import { Op } from 'sequelize';
 
 import { checkPassword } from '../middleware/validator';
@@ -92,8 +94,8 @@ exp.update = (req : Object, res : Object) => {
     }
 
     // editable fields
-    if (!req.body.preferredCurrency && !req.body.defaultAccount) {
-        return res.status(401).send({ error: 'Invalid parameters' });
+    if (!req.body.preferredCurrency && !req.body.defaultAccount && typeof req.body.ipAuthEnabled === 'undefined') {
+        return res.status(400).send({ error: 'Invalid parameters' });
     }
 
     const options = { fields: [] };
@@ -106,6 +108,11 @@ exp.update = (req : Object, res : Object) => {
     if (req.body.defaultAccount) {
         req.user.defaultAccount = req.body.defaultAccount;
         options.fields.push('defaultAccount');
+    }
+
+    if (req.body.ipAuthEnabled) {
+        req.user.ipAuthEnabled = req.body.ipAuthEnabled;
+        options.fields.push('ipAuthEnabled');
     }
 
     try {
@@ -170,6 +177,33 @@ exp.verifyIp = async (req : Object, res : Object) => {
     await ipAuth.save();
 
     success.send('Success.');
+};
+
+exp.allowIp = async (req : Object, res : Object) => {
+    const success = new SuccessResponse(res);
+    const error = new ErrorResponse(res);
+
+    let authip = {
+        userId:       req.user.id,
+        ip:           req.headers['x-real-ip'] || req.connection.remoteAddress,
+        randId:       crypto.randomBytes(20).toString('hex') // dont know if its required so I leave it here, not necessary though
+    };
+
+    try {
+        let ipAuth = await AuthorizedIp.create(authip);
+
+        ipAuth.authorized = true;
+        req.user.ipAuthEnabled = true;
+
+        await Promise.all([
+            ipAuth.save(),
+            req.user.save()
+        ]);
+    } catch (err) {
+        error.send('Unexpected error.');
+    }
+
+    success.send();
 };
 
 exp.addContact = async (req : Object, res : Object) => {

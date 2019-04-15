@@ -36,6 +36,10 @@ export default class User extends Sequelize.Model {
             _2FAKey:           DataTypes.STRING,
             _2FALastValue:     DataTypes.STRING,
             UUID:              DataTypes.UUID,
+            ipAuthEnabled:  {
+                type:         DataTypes.BOOLEAN,
+                defaultValue: false
+            },
             hasVerifiedEmail:  {
                 type:         DataTypes.BOOLEAN,
                 defaultValue: false
@@ -203,9 +207,9 @@ export default class User extends Sequelize.Model {
         ret.preferredCurrency = this.preferredCurrency;
         ret.defaultAccount = this.defaultAccount;
         ret.hasVerifiedEmail = Boolean(this.hasVerifiedEmail);
+        ret.ipAuthEnabled = this.ipAuthEnabled;
 
         const vault = await this.getVault();
-        console.log(vault);
         ret.vault = vault ? { wallet: vault.wallet, identifier: vault.identifier } : null;
 
         return ret;

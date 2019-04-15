@@ -14,7 +14,8 @@ router.patch('/', authenticate, validate, UsersController.update);
 router.post('/rpc/verify-email', authenticate, UsersController.verifyEmail);
 router.post('/rpc/resend-verification-email', authenticate, UsersController.resendVerificationEmail);
 
-router.post('/rpc/ipauth', UsersController.verifyIp);
+router.post('/ipauth', UsersController.verifyIp);
+router.post('/ipauth/enable', authenticate, UsersController.allowIp);
 
 router.get('/contacts', authenticate, UsersController.getContacts);
 router.post('/contacts', authenticate, validate, UsersController.addContact);
