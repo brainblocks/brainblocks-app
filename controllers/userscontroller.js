@@ -1,5 +1,6 @@
 /* @flow */
 import { Op } from 'sequelize';
+import { keyuri } from 'otplib/authenticator';
 
 import { checkPassword } from '../middleware/validator';
 import { checkEmail } from '../services/allowed-emails';
@@ -92,7 +93,7 @@ exp.update = (req : Object, res : Object) => {
     }
 
     // editable fields
-    if (!req.body.preferredCurrency && !req.body.defaultAccount) {
+    if (!req.body.preferredCurrency && !req.body.defaultAccount && typeof req.body.is2FAEnabled === 'undefined') {
         return res.status(401).send({ error: 'Invalid parameters' });
     }
 
@@ -106,6 +107,11 @@ exp.update = (req : Object, res : Object) => {
     if (req.body.defaultAccount) {
         req.user.defaultAccount = req.body.defaultAccount;
         options.fields.push('defaultAccount');
+    }
+
+    if (req.body.is2FAEnabled) {
+        req.user.is2FAEnabled = req.body.is2FAEnabled;
+        options.fields.push('is2FAEnabled');
     }
 
     try {
@@ -309,7 +315,13 @@ exp.updateContact = (req : Object, res : Object) => {
 exp.set2fa = async (req : Object, res : Object) => {
     try {
         await req.user.set2fa();
-        new SuccessResponse(res).send(req.user._2FAKey);
+        const key = req.user._2FAKey;
+        const username = req.user.username;
+        const uri = keyuri(username, 'BrainBlocks', key);
+        new SuccessResponse(res).send({
+            key,
+            uri
+        });
     } catch (err) {
         new ErrorResponse(res).unauthorized(err.message);
     }

@@ -27,6 +27,6 @@ router.patch('/vault', authenticate, validate, VaultsController.update);
 
 router.post('/2fa', authenticate, UsersController.set2fa);
 router.post('/2fa/confirm', authenticate, UsersController.confirm2fa);
-router.delete('/2fa/', authenticate, UsersController.deactivate2fa);
+router.delete('/2fa', authenticate, UsersController.deactivate2fa);
 
 export default router;
