@@ -28,10 +28,12 @@ export default class ErrorResponse {
         return this.send(message);
     }
 
-    send(message : string) : void {
-        return this.response.status(this.status).send({
+    send(message : string, status? : number, payload? : Object = {}) : void {
+        status = status || this.status;
+        return this.response.status(status).send({
             status: 'error',
-            error:  message || 'An error occurred'
+            error:  message || 'An error occurred',
+            ...payload
         });
     }
 }
