@@ -1,13 +1,26 @@
 /* @flow */
+import fs from 'fs';
+
 export function checkEmail(email : string) : boolean {
-    let allowedEmails = process.env.EMAILS;
+
+    let allowedEmails;
+
+    fs.exists('./emails.json', (exists) => {
+        if (exists) {
+            fs.readFile('./emails.json', (err, data) => {
+                if (err) {
+                    throw err;
+                }
+                allowedEmails = JSON.parse(data.toString());
+                allowedEmails = allowedEmails.emails;
+            });
+        }
+    });
 
     if (!allowedEmails) {
         return false;
-    } else {
-        allowedEmails = allowedEmails.split(',');
     }
-    
+
     // Find the our `@` delimiter
     let delimiterIndex = email.indexOf('@');
 

@@ -168,10 +168,11 @@ export default class {
 
         // If 2FA is enabled but no 2FA token is provided in request
         if (user.is2FAEnabled && !token2fa) {
-            // We have to decide on which http reponse type to give back
             loginInfo.failReason = 'No 2FA';
             LoginLog.create(loginInfo);
-            return error.badRequest('Please enter 2FA token');
+            return error.send('Please enter 2FA token', 401, {
+                reason: '2FA_REQUIRED'
+            });
         }
 
         // Check 2FA token
@@ -181,7 +182,9 @@ export default class {
             } catch (err) {
                 loginInfo.failReason = 'Wrong 2FA';
                 LoginLog.create(loginInfo);
-                return error.forbidden(err.message);
+                return error.send('Incorrect 2FA Code', 403, {
+                    reason: '2FA_INCORRECT'
+                });
             }
         }
 

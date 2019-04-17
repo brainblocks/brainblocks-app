@@ -203,6 +203,7 @@ export default class User extends Sequelize.Model {
         ret.preferredCurrency = this.preferredCurrency;
         ret.defaultAccount = this.defaultAccount;
         ret.hasVerifiedEmail = Boolean(this.hasVerifiedEmail);
+        ret.is2FAEnabled = this.is2FAEnabled;
 
         const vault = await this.getVault();
         console.log(vault);
