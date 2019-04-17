@@ -1,13 +1,21 @@
 /* @flow */
-
-let emailData;
-
-if (process.env.EMAIL_CHECK === 'true') {
-    emailData = require('../emails.json');
-}
+import fs from 'fs';
 
 export function checkEmail(email : string) : boolean {
-    let allowedEmails = emailData.emails;
+
+    let allowedEmails;
+
+    fs.exists('./emails.json', (exists) => {
+        if (exists) {
+            fs.readFile('./emails.json', (err, data) => {
+                if (err) {
+                    throw err;
+                }
+                allowedEmails = JSON.parse(data.toString());
+                allowedEmails = allowedEmails.emails;
+            });
+        }
+    });
 
     if (!allowedEmails) {
         return false;
