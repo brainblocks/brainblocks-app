@@ -1,7 +1,10 @@
 /* @flow */
 
-// eslint-disable-next-line import/no-commonjs
-let emailData = require('../emails.json');
+let emailData;
+
+if (process.env.EMAIL_CHECK === 'true') {
+    emailData = require('../emails.json');
+}
 
 export function checkEmail(email : string) : boolean {
     let allowedEmails = emailData.emails;
