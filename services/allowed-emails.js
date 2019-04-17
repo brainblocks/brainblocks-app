@@ -1,23 +1,20 @@
 /* @flow */
 import fs from 'fs';
+import util from 'util';
 
-export function checkEmail(email : string) : boolean {
+// Convert fs.readFile into Promise version of same
+const readFile = util.promisify(fs.readFile);
+
+export async function checkEmail(email : string) : Promise<boolean> {
 
     let allowedEmails;
 
-    fs.exists('./emails.json', (exists) => {
-        if (exists) {
-            fs.readFile('./emails.json', (err, data) => {
-                if (err) {
-                    throw err;
-                }
-                allowedEmails = JSON.parse(data.toString());
-                allowedEmails = allowedEmails.emails;
-            });
-        }
-    });
+    allowedEmails = await readFile('./emails.json');
+    allowedEmails = JSON.parse(allowedEmails.toString()).emails;
 
     if (!allowedEmails) {
+        console.log(allowedEmails);
+        console.log('no allowedEmails');
         return false;
     }
 
@@ -26,6 +23,7 @@ export function checkEmail(email : string) : boolean {
 
     // If there is no `@`, return `null` as with `str.split`
     if (delimiterIndex === -1) {
+        console.log('does not have @');
         return false;
     }
 
@@ -35,7 +33,7 @@ export function checkEmail(email : string) : boolean {
         return true;
     } else if (allowedEmails.includes(email)) {
         return true;
+    } else {
+        return false;
     }
-
-    return false;
 }
