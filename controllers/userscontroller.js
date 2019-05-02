@@ -46,7 +46,7 @@ exp.create = async (req : Object, res : Object) => {
 
     // check if password is strong enough
     if (!checkPassword(password)) {
-        return error.badRequest('Password should be at least 8 characters long and contain uppercase, lowercase and digits');
+        return error.badRequest('Password looks incorrect');
     }
 
     // check if username or email are taken

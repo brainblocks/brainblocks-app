@@ -45,7 +45,7 @@ test:
     - apt-get install -yq postgresql postgresql-client libpq-dev
     - npm install -g npm
     - npm install -g sequelize-cli
-    - npm install
+    - npm ci
     - cp .env-example .env
     - sed -i 's/SENDGRID_API_KEY=""/SENDGRID_API_KEY="$SENDGRID_API_KEY"/g' .env
     - sed -i 's/SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID=""/SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID="$SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID"/g' .env
