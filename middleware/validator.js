@@ -1,7 +1,6 @@
 /* @flow */
 
 import validator from 'validator';
-import passwordValidator from 'password-validator';
 import { RaiFunctions } from 'rai-wallet';
 
 export function hex2bin(hex : string) : boolean {
@@ -38,14 +37,6 @@ export function checkHex(str : string) : boolean {
 }
 
 export function checkPassword(password : string) : boolean {
-    /* let schema = new passwordValidator();
-    schema.is().min(8)
-        .has().uppercase()
-        .has().lowercase()
-        .has().digits();
-
-    return schema.validate(password);
-    */
     // On the client we hash passwords to a 32 byte buffer then convert to hex, so length should be 64
     return checkHex(password) && password.length === 64;
 }
