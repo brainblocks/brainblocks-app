@@ -1,7 +1,6 @@
 /* @flow */
 
 import validator from 'validator';
-import passwordValidator from 'password-validator';
 import { RaiFunctions } from 'rai-wallet';
 
 export function hex2bin(hex : string) : boolean {
@@ -33,14 +32,13 @@ export function checkUsername(username : string) : boolean {
     return (/^[a-z0-9_]{6,16}$/i).test(username);
 }
 
-export function checkPassword(password : string) : Promise<boolean> {
-    let schema = new passwordValidator();
-    schema.is().min(8)
-        .has().uppercase()
-        .has().lowercase()
-        .has().digits();
+export function checkHex(str : string) : boolean {
+    return (/^[0-9A-Fa-f]+$/).test(str);
+}
 
-    return schema.validate(password);
+export function checkPassword(password : string) : boolean {
+    // On the client we hash passwords to a 32 byte buffer then convert to hex, so length should be 64
+    return checkHex(password) && password.length === 64;
 }
 
 export function checkEmail(email : string) : Promise<boolean> {
@@ -49,10 +47,6 @@ export function checkEmail(email : string) : Promise<boolean> {
 
 export function checkNanoAddress(addr : string) : boolean {
     return RaiFunctions.parseXRBAccount(addr);
-}
-
-export function checkHex(str : string) : boolean {
-    return (/^[0-9A-Fa-f]+$/).test(str);
 }
 
 // @todo - this plus add to validate function
