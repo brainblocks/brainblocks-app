@@ -1,18 +1,29 @@
 /* @flow */
-export function checkEmail(email : string) : boolean {
-    let allowedEmails = process.env.EMAILS;
+import fs from 'fs';
+import util from 'util';
+
+// Convert fs.readFile into Promise version of same
+const readFile = util.promisify(fs.readFile);
+
+export async function checkEmail(email : string) : Promise<boolean> {
+
+    let allowedEmails;
+
+    allowedEmails = await readFile('./emails.json');
+    allowedEmails = JSON.parse(allowedEmails.toString()).emails;
 
     if (!allowedEmails) {
+        console.log(allowedEmails);
+        console.log('no allowedEmails');
         return false;
-    } else {
-        allowedEmails = allowedEmails.split(',');
     }
-    
+
     // Find the our `@` delimiter
     let delimiterIndex = email.indexOf('@');
 
     // If there is no `@`, return `null` as with `str.split`
     if (delimiterIndex === -1) {
+        console.log('does not have @');
         return false;
     }
 
@@ -22,7 +33,7 @@ export function checkEmail(email : string) : boolean {
         return true;
     } else if (allowedEmails.includes(email)) {
         return true;
+    } else {
+        return false;
     }
-
-    return false;
 }

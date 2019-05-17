@@ -2,6 +2,7 @@
 import crypto from 'crypto';
 
 import { Op } from 'sequelize';
+import { keyuri } from 'otplib/authenticator';
 
 import { checkPassword } from '../middleware/validator';
 import { checkEmail } from '../services/allowed-emails';
@@ -47,7 +48,7 @@ exp.create = async (req : Object, res : Object) => {
 
     // check if password is strong enough
     if (!checkPassword(password)) {
-        return error.badRequest('Password should be at least 8 characters long and contain uppercase, lowercase and digits');
+        return error.badRequest('Password looks incorrect');
     }
 
     // check if username or email are taken
@@ -94,8 +95,8 @@ exp.update = (req : Object, res : Object) => {
     }
 
     // editable fields
-    if (!req.body.preferredCurrency && !req.body.defaultAccount && typeof req.body.ipAuthEnabled === 'undefined') {
-        return res.status(400).send({ error: 'Invalid parameters' });
+    if (!req.body.preferredCurrency && !req.body.defaultAccount && typeof req.body.is2FAEnabled === 'undefined' && typeof req.body.ipAuthEnabled === 'undefined') {
+        return res.status(401).send({ error: 'Invalid parameters' });
     }
 
     const options = { fields: [] };
@@ -113,6 +114,11 @@ exp.update = (req : Object, res : Object) => {
     if (req.body.ipAuthEnabled) {
         req.user.ipAuthEnabled = req.body.ipAuthEnabled;
         options.fields.push('ipAuthEnabled');
+    }
+
+    if (req.body.is2FAEnabled) {
+        req.user.is2FAEnabled = req.body.is2FAEnabled;
+        options.fields.push('is2FAEnabled');
     }
 
     try {
@@ -343,7 +349,13 @@ exp.updateContact = (req : Object, res : Object) => {
 exp.set2fa = async (req : Object, res : Object) => {
     try {
         await req.user.set2fa();
-        new SuccessResponse(res).send(req.user._2FAKey);
+        const key = req.user._2FAKey;
+        const username = req.user.username;
+        const uri = keyuri(username, 'BrainBlocks', key);
+        new SuccessResponse(res).send({
+            key,
+            uri
+        });
     } catch (err) {
         new ErrorResponse(res).unauthorized(err.message);
     }

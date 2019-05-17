@@ -41,7 +41,7 @@ describe('App', () => {
         }).then(() => {
             request(app).post('/api/users')
                 .set('Content-Type', 'application/json')
-                .send({ username: 'mochatest', email: 'mochatest@bb.io', password: 'Password.123' })
+                .send({ username: 'mochatest', email: 'mochatest@bb.io', password: 'e3c3a40a2c29fec3fc0c9f150430cd1fbd7f0e218175ce5d93aa3a054a339660' }) // password = HashedPassword123!
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, res) => {
@@ -60,7 +60,7 @@ describe('App', () => {
             // login and keep session token for next tests
             request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
-                .send({ username: 'mochatest_sout', password: 'mochatestpassword' })
+                .send({ username: 'mochatest_sout', password: 'e3c3a40a2c29fec3fc0c9f150430cd1fbd7f0e218175ce5d93aa3a054a339660' }) // password = HashedPassword123!
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, res) => {
@@ -75,7 +75,7 @@ describe('App', () => {
         it('Login test (email)', (done : Function) => {
             request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
-                .send({ email: 'mochatest@mochatest.fave', password: 'mochatestpassword' })
+                .send({ email: 'mochatest@mochatest.fave', password: 'e3c3a40a2c29fec3fc0c9f150430cd1fbd7f0e218175ce5d93aa3a054a339660' }) // password = HashedPassword123!
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, res) => {
@@ -161,7 +161,7 @@ describe('App', () => {
             // login and keep session token for next tests
             request(app).post('/api/auth')
                 .set('Content-Type', 'application/json')
-                .send({ username: 'mochatest_login', password: 'mochatestpassword' })
+                .send({ username: 'mochatest_login', password: 'e3c3a40a2c29fec3fc0c9f150430cd1fbd7f0e218175ce5d93aa3a054a339660' })
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end((err, res) => {

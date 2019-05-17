@@ -11,12 +11,12 @@ export default {
             User.create({
                 username: 'mochatest_login',
                 email:    'mochatest@mochatest.fave',
-                password: 'mochatestpassword'
+                password: 'e3c3a40a2c29fec3fc0c9f150430cd1fbd7f0e218175ce5d93aa3a054a339660' // password = HashedPassword123!
             }),
             User.create({
                 username: 'mochatest_sout',
                 email:    'mochatest2@mochatest.fave',
-                password: 'mochatestpassword'
+                password: 'e3c3a40a2c29fec3fc0c9f150430cd1fbd7f0e218175ce5d93aa3a054a339660' // password = HashedPassword123!
             })
         ]).then((users) => {
             return Promise.all([
