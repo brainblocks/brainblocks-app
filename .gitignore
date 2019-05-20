@@ -5,3 +5,4 @@ node_modules
 *.sublime-workspace
 npm-debug.log
 emails.json
+*/.DS_Store
