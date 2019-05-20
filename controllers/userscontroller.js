@@ -123,6 +123,49 @@ exp.update = (req : Object, res : Object) => {
     return res.status(200).send({ status: 'Success' });
 };
 
+exp.updatePasswordAndVault = async (req : Object, res : Object) => {
+    const success = new SuccessResponse(res);
+    const error = new ErrorResponse(res);
+    const { currentPassword, newPassword, wallet } = req.body || {};
+    let user = req.user;
+    let vault = await user.getVault();
+
+    // make sure there is a vault
+    if (!vault) {
+        return error.notFound('No vault found');
+    }
+
+    // wallet is the only editable field
+    if (!wallet) {
+        error.badRequest('Invalid parameters');
+    }
+
+    // make sure the current password is correct
+    if (!user.checkPassword(currentPassword)) {
+        return error.badRequest('Could not verify Password');
+    }
+
+    // update user passHash
+    req.user.passHash = newPassword;
+
+    // update vault wallet
+    vault.wallet = wallet;
+
+    try {
+        // try to save the new vault wallet
+        await vault.save({ fields: [ 'wallet' ] });
+        // try to save the new user
+        await req.user.save();
+        // return success
+        success.send({
+            vault: vault.toJSON()
+        });
+    } catch (err) {
+        console.error('Error updating vault and password', err);
+        error.send('Error updating vault and password');
+    }
+};
+
 exp.verifyEmail = async (req : Object, res : Object) => {
     const success = new SuccessResponse(res);
     const error = new ErrorResponse(res);
