@@ -141,7 +141,8 @@ exp.updatePasswordAndVault = async (req : Object, res : Object) => {
     }
 
     // make sure the current password is correct
-    if (!user.checkPassword(currentPassword)) {
+    const check = await user.checkPassword(currentPassword);
+    if (!check) {
         return error.unauthorized('Could not verify Password');
     }
 
