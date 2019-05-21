@@ -141,12 +141,13 @@ exp.updatePasswordAndVault = async (req : Object, res : Object) => {
     }
 
     // make sure the current password is correct
-    if (!user.checkPassword(currentPassword)) {
-        return error.badRequest('Could not verify Password');
+    const check = await user.checkPassword(currentPassword);
+    if (!check) {
+        return error.unauthorized('Could not verify Password');
     }
 
     // update user passHash
-    req.user.passHash = newPassword;
+    req.user.password = newPassword;
 
     // update vault wallet
     vault.wallet = wallet;
@@ -155,7 +156,7 @@ exp.updatePasswordAndVault = async (req : Object, res : Object) => {
         // try to save the new vault wallet
         await vault.save({ fields: [ 'wallet' ] });
         // try to save the new user
-        await req.user.save();
+        await req.user.save({ fields: [ 'password', 'passHash' ] });
         // return success
         success.send({
             vault: vault.toJSON()

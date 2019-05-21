@@ -13,9 +13,10 @@ router.get('/', authenticate, UsersController.getUser);
 router.patch('/', authenticate, validate, UsersController.update);
 router.post('/rpc/verify-email', authenticate, UsersController.verifyEmail);
 router.post('/rpc/resend-verification-email', authenticate, UsersController.resendVerificationEmail);
-router.post('/rpc/update-password', authenticate, UsersController.updatePasswordAndVault);
 
 router.post('/rpc/ipauth', UsersController.verifyIp);
+
+router.patch('/password', authenticate, UsersController.updatePasswordAndVault);
 
 router.get('/contacts', authenticate, UsersController.getContacts);
 router.post('/contacts', authenticate, validate, UsersController.addContact);
