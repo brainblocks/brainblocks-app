@@ -17,6 +17,10 @@ export function isValidJSON(json : string) : boolean {
     return true;
 }
 
+export function ValidateIPaddress(ipAddress : string) : boolean {
+    return (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipAddress))
+}
+
 export function checkLabel(label : string) : boolean {
     return (/^[a-z0-9_ ]{1,16}$/i).test(label);
 }
@@ -172,6 +176,16 @@ export function validate(req : Object, res : Object, next : Function) : mixed {
     if (req.body.preferredCurrency) {
         if (!checkCurrency(req.body.preferredCurrency)) {
             return res.status(400).send({ error: 'Invalid currency' });
+        }
+    }
+
+    if (req.body.address && req.body.ip && req.body.useragent) {
+        if (!RaiFunctions.parseXRBAccount(req.body.address)) {
+            return res.status(400).send({ error: 'Invalid Nano address' });
+        }
+
+        if (!ValidateIPaddress(req.body.ip)) {
+            return res.status(400).send({ error: 'Invalid ip address' });
         }
     }
 

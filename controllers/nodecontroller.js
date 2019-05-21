@@ -1,5 +1,6 @@
 /* @flow */
 import bigInt from 'big-integer';
+import rp from 'request-promise';
 
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
@@ -7,7 +8,7 @@ import { getChains, republishBlock, getBalance, getBlockAccount, process, genera
 
 export default class {
 
-    static async chains (req : Object, res : Object) : Promise<void> {
+    static async chains(req : Object, res : Object) : Promise<void> {
         const accounts = req.body.accounts;
         let success = new SuccessResponse(res);
         let error = new ErrorResponse(res);
@@ -25,7 +26,45 @@ export default class {
         }
     }
 
-    static async republish (req : Object, res : Object) : Promise<void> {
+    // static async faucet(req : Object, res : Object) : Promise<void> {
+    //     let success = new SuccessResponse(res);
+    //     let error = new ErrorResponse(res);
+    //     const address = req.body.address;
+    //     const ip = req.body.ip;
+    //     const ua = req.body.useragent;
+    //
+    //     if (!process.env.FAUCET) {
+    //         return error.send('Error requesting faucet');
+    //     }
+    //
+    //     let options = {
+    //         method: 'POST',
+    //         uri:    'https://nano-faucet.org/nano/send.php',
+    //         body:   {
+    //             address,
+    //             ip_address: ip,
+    //             user_agent: ua,
+    //             api_key:    process.env.FAUCET
+    //         },
+    //         json: false // Automatically stringifies the body to JSON
+    //     };
+    //
+    //     await rp(options)
+    //         .then((parsed) => {
+    //             console.log(parsed);
+    //             if (parsed.includes('Nano Sent')) {
+    //                 success.send({
+    //                     status:   'success'
+    //                 });
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             console.error(`Error requesting faucet`, err);
+    //             return error.send('Error requesting faucet');
+    //         });
+    // }
+
+    static async republish(req : Object, res : Object) : Promise<void> {
         const hash = req.body.hash;
         let success = new SuccessResponse(res);
         let error = new ErrorResponse(res);
@@ -43,7 +82,7 @@ export default class {
 
     }
 
-    static async broadcast (req : Object, res : Object) : Promise<void> {
+    static async broadcast(req : Object, res : Object) : Promise<void> {
         let success = new SuccessResponse(res);
         let error = new ErrorResponse(res);
 
@@ -66,7 +105,7 @@ export default class {
                 console.error('Error getting account before broadcast', err);
                 return error.send('Error getting account before broadcast');
             }
-            
+
             if (bigInt(balance) !== bigInt(amount)) {
                 return error.badRequest('Client account balance does not match actual balance.');
             }
