@@ -1,6 +1,6 @@
 /* @flow */
 import bigInt from 'big-integer';
-import rp from 'request-promise';
+// import rp from 'request-promise';
 
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
