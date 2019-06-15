@@ -65,6 +65,7 @@ staging:
       - develop
   script:
     - ssh brainblocks@ssh.node1.brainblocks.io "cd /home/brainblocks/staging/app && git stash && git pull https://git.brainblocks.io/brainblocks/brainblocks-app.git && npm install && pm2 restart staging-app"
+    - ssh brainblocks@ssh.node3.brainblocks.io "cd /home/brainblocks/staging/app && git stash && git pull https://git.brainblocks.io/brainblocks/brainblocks-app.git && npm install && pm2 restart staging-app"
 
 deploy:
   stage: deploy
@@ -73,3 +74,4 @@ deploy:
       - master
   script:
     - ssh brainblocks@ssh.node1.brainblocks.io "cd /home/brainblocks/app && git stash && git pull https://git.brainblocks.io/brainblocks/brainblocks-app.git && npm install && pm2 restart app"
+    - ssh brainblocks@ssh.node3.brainblocks.io "cd /home/brainblocks/app && git stash && git pull https://git.brainblocks.io/brainblocks/brainblocks-app.git && npm install && pm2 restart app"
