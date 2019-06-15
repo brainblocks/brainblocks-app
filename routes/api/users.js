@@ -16,6 +16,8 @@ router.post('/rpc/resend-verification-email', authenticate, UsersController.rese
 
 router.post('/rpc/ipauth', UsersController.verifyIp);
 
+router.patch('/password', authenticate, UsersController.updatePasswordAndVault);
+
 router.get('/contacts', authenticate, UsersController.getContacts);
 router.post('/contacts', authenticate, validate, UsersController.addContact);
 router.delete('/contacts/:contactId', authenticate, validate, UsersController.deleteContact);
