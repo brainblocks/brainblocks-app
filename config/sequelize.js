@@ -13,6 +13,7 @@ module.exports = {
         dialect:  process.env.DB_CONNECTION,
         logging:  process.env.LOGGING === 'true' ? console.log : false,
         operatorsAliases: false,
+        native: true,
         define:   {
             underscored: false,
             timestamps: true
