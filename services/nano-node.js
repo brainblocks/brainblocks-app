@@ -144,16 +144,16 @@ export async function getHashes(hashes : Array<string>) : Promise<Object>  {
 export async function getInfo(hash : string) : Object {
     let res = await nanoAction('block_info', { hash });
     // replace xrb_ for nano_
-    res.block_account = res.block_account.replace('xrb_', 'nano_');
+    res.block_account = res.block_account;
 
     if (res.contents.account) {
-        res.contents.account = res.contents.account.replace('xrb_', 'nano_');
+        res.contents.account = res.contents.account;
     }
     if (res.contents.representative) {
-        res.contents.representative = res.contents.representative.replace('xrb_', 'nano_');
+        res.contents.representative = res.contents.representative;
     }
     if (res.contents.link_as_account) {
-        res.contents.link_as_account = res.contents.link_as_account.replace('xrb_', 'nano_');
+        res.contents.link_as_account = res.contents.link_as_account;
     }
     // return block
     return res;
@@ -195,7 +195,7 @@ export async function getChains(inputAccounts : Array<string>) : Promise<Object>
     let accounts = [];
 
     for (let account of inputAccounts) {
-        accounts.push(account.replace('xrb_', 'nano_'));
+        accounts.push(account);
     }
 
     const frontiers = await getFrontiers(accounts);
@@ -205,8 +205,8 @@ export async function getChains(inputAccounts : Array<string>) : Promise<Object>
         let accountObject = { balance, pending, blocks: [] };
 
         // check if account is in frontiers
-        if (frontiers.hasOwnProperty(account.replace('nano_', 'xrb_'))) {
-            const chain = await getChain(frontiers[account.replace('nano_', 'xrb_')]);
+        if (frontiers.hasOwnProperty(account)) {
+            const chain = await getChain(frontiers[account]);
             const blocks = await getHashes(chain);
             const blocks2 = [];
 
@@ -215,19 +215,19 @@ export async function getChains(inputAccounts : Array<string>) : Promise<Object>
                 let contents = JSON.parse(data.contents);
 
                 if (data.block_account) {
-                    data.block_account = data.block_account.replace('xrb_', 'nano_');
+                    data.block_account = data.block_account;
                 }
                 if (data.source_account) {
-                    data.source_account = data.source_account.replace('xrb_', 'nano_');
+                    data.source_account = data.source_account;
                 }
                 if (contents.account) {
-                    contents.account = contents.account.replace('xrb_', 'nano_');
+                    contents.account = contents.account;
                 }
                 if (contents.representative) {
-                    contents.representative = contents.representative.replace('xrb_', 'nano_');
+                    contents.representative = contents.representative;
                 }
                 if (contents.link_as_account) {
-                    contents.link_as_account = contents.link_as_account.replace('xrb_', 'nano_');
+                    contents.link_as_account = contents.link_as_account;
                 }
 
                 // write contents changes back to data block
@@ -235,12 +235,12 @@ export async function getChains(inputAccounts : Array<string>) : Promise<Object>
 
                 if (contents.type === 'open' || contents.type === 'receive') {
                     const blockAccount = await getBlockAccount(contents.source);
-                    data.origin = blockAccount.replace('xrb_', 'nano_');
+                    data.origin = blockAccount;
                 } else if (contents.type === 'state') {
                     // check if it is receiving
                     if (data.source_account) {
                         const blockAccount = data.source_account;
-                        data.origin = blockAccount.replace('xrb_', 'nano_');
+                        data.origin = blockAccount;
                     }
                 }
                 blocks2.push(data);
@@ -259,7 +259,7 @@ export async function getPending(inputAccounts : Array<string>) : Promise<Object
     let accounts = [];
 
     for (let account of inputAccounts) {
-        accounts.push(account.replace('xrb_', 'nano_'));
+        accounts.push(account);
     }
     const pending = await getPendingBlocks(accounts);
     let res = { accounts: {} };
@@ -275,11 +275,11 @@ export async function getPending(inputAccounts : Array<string>) : Promise<Object
                 const info = hashes[hash];
                 let blockObject = {};
                 blockObject.amount = info.amount;
-                blockObject.from = info.block_account.replace('xrb_', 'nano_');
+                blockObject.from = info.block_account;
                 blockObject.hash = hash;
                 blocks.push(blockObject);
             }
-            const nanoAccount = account.replace('xrb_', 'nano_');
+            const nanoAccount = account;
             const accountObject = { account: nanoAccount, blocks };
 
             res.accounts[nanoAccount] = accountObject;
