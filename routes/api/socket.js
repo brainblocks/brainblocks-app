@@ -109,7 +109,7 @@ function parseEvent(ws, event) {
     let accounts = [];
     if (event.hasOwnProperty('data') && Array.isArray(event.data)) {
         for (let account of event.data) {
-            accounts.push(account.replace('xrb_', 'nano_'));
+            accounts.push(account);
         }
     }
     switch (event.event) {
@@ -150,13 +150,13 @@ router.post('/new-block/:key/submit', async (req, res) => {
     /* All block types
     if (fullBlock.block.type === 'state') {
         if (fullBlock.is_send === 'true' && fullBlock.block.link_as_account) {
-            destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
+            destinations.push(fullBlock.block.link_as_account);
         }
         // push to destinations array
         destinations.push(fullBlock.account.replace('xrb_', 'nano_'));
     } else {
         // push to destinations array
-        destinations.push(fullBlock.block.destination.replace('xrb_', 'nano_'));
+        destinations.push(fullBlock.block.destination);
     }
     */
 
@@ -164,7 +164,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
     if (fullBlock.block.type !== 'state' || fullBlock.is_send !== 'true') {
         return;
     }
-    destinations.push(fullBlock.block.link_as_account.replace('xrb_', 'nano_'));
+    destinations.push(fullBlock.block.link_as_account);
 
     // Send it to all!
     for (let destination of destinations) {
