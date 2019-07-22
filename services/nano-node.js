@@ -127,8 +127,7 @@ export async function getChain(block : string) : Promise<Array<string>>  {
 export async function getPendingBlocks(accounts : Array<string>) : Promise<Object> {
     let res = await nanoAction('accounts_pending', {
         accounts,
-        'count':   '500',
-        'sorting': 'true'
+        count: '500'
     });
 
     return res.blocks;
