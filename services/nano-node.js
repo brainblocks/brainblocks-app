@@ -143,8 +143,6 @@ export async function getHashes(hashes : Array<string>) : Promise<Object>  {
 
 export async function getInfo(hash : string) : Object {
     let res = await nanoAction('block_info', { hash });
-    // replace xrb_ for nano_
-    res.block_account = res.block_account;
 
     if (res.contents.account) {
         res.contents.account = res.contents.account;
@@ -164,7 +162,7 @@ export async function getBlockAccount(hash : string) : Promise<string> {
         hash
     });
 
-    return res.account.replace('xrb_', 'nano_');
+    return res.account;
 }
 
 export async function getBalance(account : string) : Promise<{ balance : string, pending : string }> {
@@ -254,13 +252,7 @@ export async function getChains(inputAccounts : Array<string>) : Promise<Object>
     return res;
 }
 
-export async function getPending(inputAccounts : Array<string>) : Promise<Object> {
-    // replace xrb_ with nano_
-    let accounts = [];
-
-    for (let account of inputAccounts) {
-        accounts.push(account);
-    }
+export async function getPending(accounts : Array<string>) : Promise<Object> {
     const pending = await getPendingBlocks(accounts);
     let res = { accounts: {} };
 

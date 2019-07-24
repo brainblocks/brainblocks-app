@@ -153,7 +153,7 @@ router.post('/new-block/:key/submit', async (req, res) => {
             destinations.push(fullBlock.block.link_as_account);
         }
         // push to destinations array
-        destinations.push(fullBlock.account.replace('xrb_', 'nano_'));
+        destinations.push(fullBlock.account);
     } else {
         // push to destinations array
         destinations.push(fullBlock.block.destination);
