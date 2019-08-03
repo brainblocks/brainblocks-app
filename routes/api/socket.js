@@ -1,16 +1,22 @@
 /* @flow */
 import express from 'express';
 import WebSocket from 'ws';
+// import dotenv from 'dotenv';
 
 import SuccessResponse from '../../responses/success_response';
 import { getInfo, getPending } from '../../services/nano-node';
 
+// const config = dotenv.config();
+
 let router = express.Router();
 
-const port = process.env.WS_PORT;
-const wss = new WebSocket.Server({ port });
-const nodeSocketConnection = `ws://${ process.env.NODE_CONNECTION }:${ process.env.NODE_WS_PORT }`;
-let nodeSocket = new WebSocket(nodeSocketConnection);
+const wsPort = process.env.WS_PORT;
+const nodeConnection = process.env.NODE_CONNECTION || 'ssh.node2.brainblocks.io';
+const nodeWSPort = process.env.NODE_WS_PORT || 7078;
+const wss = new WebSocket.Server({ port: wsPort });
+const socketConnection = `ws://${ nodeConnection }:${ nodeWSPort }`;
+console.log(socketConnection);
+let nodeSocket = new WebSocket(socketConnection);
 
 // websocket subscriber map
 let subscriptionMap = {};
