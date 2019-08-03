@@ -15,7 +15,6 @@ const nodeConnection = process.env.NODE_CONNECTION || 'ssh.node2.brainblocks.io'
 const nodeWSPort = process.env.NODE_WS_PORT || 7078;
 const wss = new WebSocket.Server({ port: wsPort });
 const socketConnection = `ws://${ nodeConnection }:${ nodeWSPort }`;
-console.log(socketConnection);
 let nodeSocket = new WebSocket(socketConnection);
 
 // websocket subscriber map
