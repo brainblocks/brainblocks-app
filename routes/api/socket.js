@@ -1,14 +1,21 @@
 /* @flow */
 import express from 'express';
 import WebSocket from 'ws';
+// import dotenv from 'dotenv';
 
 import SuccessResponse from '../../responses/success_response';
 import { getInfo, getPending } from '../../services/nano-node';
 
+// const config = dotenv.config();
+
 let router = express.Router();
 
-const port = process.env.WS_PORT;
-const wss = new WebSocket.Server({ port });
+const wsPort = process.env.WS_PORT;
+const nodeConnection = process.env.NODE_CONNECTION || 'ssh.node2.brainblocks.io';
+const nodeWSPort = process.env.NODE_WS_PORT || 7078;
+const wss = new WebSocket.Server({ port: wsPort });
+const socketConnection = `ws://${ nodeConnection }:${ nodeWSPort }`;
+let nodeSocket = new WebSocket(socketConnection);
 
 // websocket subscriber map
 let subscriptionMap = {};
@@ -17,6 +24,14 @@ let subscriptionMap = {};
 let tpsCount = 0;
 // Seconds between reporting statistics to console (Connected clients, TPS)
 const statTime = 10;
+
+router.post('/', (req, res) => {
+    let success = new SuccessResponse(res);
+
+    success.send({
+        status: 'success'
+    });
+});
 
 async function getPendingBlocks(ws, accounts) : Promise<void> {
     if (!accounts) {
@@ -127,44 +142,45 @@ function parseEvent(ws, event) {
     }
 }
 
-router.post('/new-block/:key/submit', async (req, res) => {
-    let fullBlock = req.body;
-    let { key } = req.params;
+nodeSocket.on('open', () => {
+    console.log('Node Socket - connected');
+    let subscribe = JSON.stringify({ 'action': 'subscribe', 'topic': 'confirmation' });
+    nodeSocket.send(subscribe);
+});
+
+nodeSocket.on('close', () => {
+    console.log('Node Socket - disconnected');
+});
+
+nodeSocket.on('message', async message => {
+    let fullPacket = JSON.parse(message);
+    let fullMessage = fullPacket.message;
+    let fullBlock = fullMessage.block;
 
     // increase tps counter
     tpsCount = tpsCount += 1;
 
-    if (key !== 'Ndr0ki0JKdByHeaRBB0FynD0U6N8v1433axWrl5') {
-        return res.status(403).send({ error: 'Client is rejected!' });
-    }
-
-    try {
-        fullBlock.block = JSON.parse(fullBlock.block);
-    } catch (err) {
-        console.log(`Error parsing block data! `, err.message);
-        return res.status(403).send({ error: 'Error parsing block data!' });
-    }
-
     let destinations = [];
 
     /* All block types
-    if (fullBlock.block.type === 'state') {
-        if (fullBlock.is_send === 'true' && fullBlock.block.link_as_account) {
-            destinations.push(fullBlock.block.link_as_account);
-        }
-        // push to destinations array
-        destinations.push(fullBlock.account);
-    } else {
-        // push to destinations array
-        destinations.push(fullBlock.block.destination);
-    }
+      if (fullBlock.block.type === 'state') {
+          if (fullBlock.is_send === 'true' && fullBlock.block.link_as_account) {
+              destinations.push(fullBlock.block.link_as_account);
+          }
+          // push to destinations array
+          destinations.push(fullBlock.account);
+      } else {
+          // push to destinations array
+          destinations.push(fullBlock.block.destination);
+      }
     */
 
     /* For now, only sends where we are the recipient */
-    if (fullBlock.block.type !== 'state' || fullBlock.is_send !== 'true') {
+    if (fullBlock.type !== 'state' || fullBlock.subtype !== 'send') {
         return;
     }
-    destinations.push(fullBlock.block.link_as_account);
+
+    destinations.push(fullBlock.link_as_account);
 
     // Send it to all!
     for (let destination of destinations) {
@@ -172,10 +188,8 @@ router.post('/new-block/:key/submit', async (req, res) => {
             return;
         } // Nobody listening for this
 
-        console.log(`Sending block to subscriber ${ destination }: `, fullBlock.amount);
-
         for (let ws of subscriptionMap[destination]) {
-            const hash = fullBlock.hash;
+            const hash = fullMessage.hash;
             const nodeBlock = await getInfo(hash);
             const fromAccount = nodeBlock.block_account;
             let data = { accounts: { } };
@@ -198,14 +212,10 @@ router.post('/new-block/:key/submit', async (req, res) => {
             ws.send(JSON.stringify(event));
         }
     }
-    let success = new SuccessResponse(res);
-
-    success.send({
-        status: 'success'
-    });
 });
 
 wss.on('connection', (ws) => {
+    ws.isAlive = true;
     ws.subscriptions = [];
 
     ws.on('message', message => {
@@ -219,7 +229,7 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', event => {
-        console.log(`WS - Connection Closed`, event);
+        console.log(`Wallet Socket - Connection Closed`, event);
 
         for (let account of ws.subscriptions) {
             if (!subscriptionMap[account] || !subscriptionMap[account].length) {
@@ -253,6 +263,12 @@ async function pulse() : Promise<void> {
 
     for (let destination of Object.keys(subscriptionMap)) {
         for (let ws of subscriptionMap[destination]) {
+            // kill dead connections
+            if (ws.isAlive === false) {
+                ws.terminate();
+                continue;
+            }
+
             // send ping to destination
             ping(ws);
 

@@ -4,6 +4,6 @@ const config = require('dotenv').config();
 
 module.exports = {
     development: {
-        host:  process.env.NODE_CONNECTION
+        host:  `http://${process.env.NODE_CONNECTION}:${process.env.NODE_RPC_PORT}`
     }
 };
