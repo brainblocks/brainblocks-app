@@ -27,6 +27,6 @@ Request Body - `{"pair": "BTC_NANO", "receiveAddress": "nano_1brainb3zz81wmhxnds
 Response - `{"status": "success","trade": {"payinAddress": "34CnksbiGVVt4jBn1u37kcS9WWocReK1eD","payoutAddress": "nano_1brainb3zz81wmhxndsbrjb94hx3fhr1fyydmg6iresyk76f3k7y7jiazoji","fromCurrency": "btc","toCurrency": "nano","refundAddress": "3LKxArKXrJ7EfWrn1Ed6V82rVAQv8GML9s","id": "c956509259f767","amount": 17246.3333805}}`
 
 # Get Trade Status
-POST `/api/trade/status`
-Request Body - `{"pair": "BTC_NANO", "receiveAddress": "nano_1brainb3zz81wmhxndsbrjb94hx3fhr1fyydmg6iresyk76f3k7y7jiazoji", "tradeAmount": 1.5, "extraId": "null", "refundAddress": "3LKxArKXrJ7EfWrn1Ed6V82rVAQv8GML9s"}` (Extra Id for currencies that require it. Pair is "FROM_TO")
-Response - `{"status": "success","trade": {"status": "waiting","payinAddress": "3HQ5KPg2bjZxRLixftXVygfXGF2YdJKdDW","payoutAddress": "nano_1brainb3zz81wmhxndsbrjb94hx3fhr1fyydmg6iresyk76f3k7y7jiazoji","fromCurrency": "btc","toCurrency": "nano","id": "22bbed1f24fe9e","updatedAt": "2019-08-16T20:50:54.557Z","expectedSendAmount": 1.75,"expectedReceiveAmount": 17280.7534505,"createdAt": "2019-08-16T20:50:54.557Z","isPartner": false}}`
+POST `/api/trade/getTrades`
+Request Body - Just pulls user id from logged in user
+Response - `{"status": "success","trades": [{"status": "waiting","payinAddress": "3BofZme8N8ww2AWT7pmPR9XSYcqkGFUPSK","payoutAddress": "nano_1brainb3zz81wmhxndsbrjb94hx3fhr1fyydmg6iresyk76f3k7y7jiazoji","fromCurrency": "btc","toCurrency": "nano","refundAddress": "3LKxArKXrJ7EfWrn1Ed6V82rVAQv8GML9s","id": 1,"updatedAt": "2019-08-17T02:47:55.066Z","expectedSendAmount": 1.5,"expectedReceiveAmount": 14429.8182207,"createdAt": "2019-08-17T02:47:55.066Z"}]}`

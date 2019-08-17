@@ -153,7 +153,7 @@ export async function createTrade(pair : string, receiveAddress : string, tradeA
     return JSON.parse(res.body);
 }
 
-export async function getTradeStatus(id : string) : Promise<{id : string, status : string, hash : string, payinHash : string, payoutHash : string, payinAddress : string, payoutAddress : string, payinExtraId : string, payoutExtraId : string, fromCurrency : string, toCurrency : string, amountSend : number, amountReceive : number, networkFee : number, updatedAt : string}> {
+export async function getTradeStatus(id : string) : Promise<{id : string, status : string, hash : string, payinHash : string, payoutHash : string, payinAddress : string, payoutAddress : string, payinExtraId : string, payoutExtraId : string, fromCurrency : string, toCurrency : string, amountSend : number, amountReceive : number, networkFee : number, updatedAt : string, isPartner : boolean}> {
     let res;
 
     try {

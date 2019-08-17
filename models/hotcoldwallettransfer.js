@@ -10,7 +10,7 @@ class HotColdWalletTransfer extends Sequelize.Model {
             {
                 nanoTxId:     DataTypes.STRING,
                 type:         DataTypes.STRING,
-                fromId:              DataTypes.INTEGER,
+                fromId:       DataTypes.INTEGER,
                 fromAddress:  DataTypes.STRING,
                 toId:         DataTypes.INTEGER,
                 toAddress:    DataTypes.STRING,

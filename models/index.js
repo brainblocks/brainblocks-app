@@ -8,6 +8,7 @@ import User from './user';
 import Account from './account';
 import BBTransaction from './bbtransaction';
 import GlobalTransaction from './globaltransaction';
+import Trades from './trades';
 import TempAddress from './tempaddress';
 import Vault from './vault';
 import ColdWallet from './coldwallet';
@@ -49,7 +50,8 @@ const models = {
     LoginLog:              LoginLog.init(sequelize, Sequelize),
     PasswordReset:         PasswordReset.init(sequelize, Sequelize),
     UserToken:             UserToken.init(sequelize, Sequelize),
-    Contact:               Contact.init(sequelize, Sequelize)
+    Contact:               Contact.init(sequelize, Sequelize),
+    Trades:                Trades.init(sequelize, Sequelize)
 };
 
 Object.values(models)
@@ -57,7 +59,7 @@ Object.values(models)
     .filter(model => typeof model.associate === 'function')
     // $FlowFixMe
     .forEach(model => model.associate(models));
-  
+
 const db = {
     models,
     Sequelize,
