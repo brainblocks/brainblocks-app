@@ -125,7 +125,12 @@ export default class {
             });
         } catch (err) {
             console.error(`Error creating trade`, err);
-            return error.send('Error creating trade');
+            if (err.statusCode !== 500 && err.hasOwnProperty('error')) {
+                return error.send('Error creating trade', err.statusCode, {
+                    reason: JSON.parse(err.error)
+                });
+            }
+            return error.send('Error creating trade')
         }
     }
 
