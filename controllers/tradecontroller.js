@@ -130,7 +130,7 @@ export default class {
                     reason: JSON.parse(err.error)
                 });
             }
-            return error.send('Error creating trade')
+            return error.send('Error creating trade');
         }
     }
 
