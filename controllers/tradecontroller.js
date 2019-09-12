@@ -162,6 +162,32 @@ export default class {
                 trades: list
             });
         } catch (err) {
+            console.error(`Error fetching trades`, err);
+            return error.send('Error fetching trades');
+        }
+    }
+
+    static async getTrade(req : Object, res : Object) : Promise<void> {
+        const user = req.user;
+        const id   = req.id;
+
+        // ensure authorization
+        if (!user) {
+            return res.status(401).send({ error: 'Not authorized' });
+        }
+
+        let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
+
+        try {
+            const trade = await Trades.findOne({ userId: user.userId, id });
+            const currentTradeStatus = await getTradeStatus(trade.tradeId);
+
+            success.send({
+                status: 'success',
+                trade:  currentTradeStatus
+            });
+        } catch (err) {
             console.error(`Error fetching trade`, err);
             return error.send('Error fetching trade');
         }
