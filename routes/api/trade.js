@@ -13,5 +13,6 @@ router.post('/estimate', authenticate, TradeController.getTradeEstimate);
 router.post('/currencyPairs', authenticate, TradeController.getTradePairs);
 router.post('/create', authenticate, TradeController.createTrade);
 router.post('/getTrades', authenticate, TradeController.getTrades);
+router.post('/getTrade', authenticate, TradeController.getTrade);
 
 export default router;
