@@ -2,13 +2,13 @@
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
-import { getTradeCurrencies, getTradePairs, getTradeEstimate, createTrade, getMarketPairs, getMinimalAmount, getTradeStatus } from '../services/trade';
+import { getTradeCurrencies, getTradePairs, getTradeEstimate, createTrade, getMarketPairs, getMinimalAmount, getTradeStatus, getTransactions } from '../services/trade';
 
 const { Trades } = models.models;
 
 export default class {
 
-    static async getMarketPairs(req : Object, res : Object) : Promise<void> {
+    static async marketPairs(req : Object, res : Object) : Promise<void> {
         const success = new SuccessResponse(res);
         const user = req.user;
 
@@ -20,7 +20,7 @@ export default class {
         success.send({ status: 'success', pairs: await getMarketPairs() });
     }
 
-    static async getTradeCurrencies(req : Object, res : Object) : Promise<void> {
+    static async tradeCurrencies(req : Object, res : Object) : Promise<void> {
         const success = new SuccessResponse(res);
         const user = req.user;
 
@@ -32,10 +32,10 @@ export default class {
         success.send({ status: 'success', currencies: await getTradeCurrencies() });
     }
 
-    static async getTradePairs(req : Object, res : Object) : Promise<void> {
+    static async tradePairs(req : Object, res : Object) : Promise<void> {
         const success = new SuccessResponse(res);
         const user = req.user;
-        const currency = req.body.currency;
+        const currency = req.params.currency;
 
         // ensure authorization
         if (!user) {
@@ -45,10 +45,10 @@ export default class {
         success.send({ status: 'success', currencies: await getTradePairs(currency) });
     }
 
-    static async getMinimalAmountPair(req : Object, res : Object) : Promise<void> {
+    static async minimalAmountPair(req : Object, res : Object) : Promise<void> {
         const success = new SuccessResponse(res);
         const user = req.user;
-        const pair = req.body.pair;
+        const pair = req.params.pair;
 
         // ensure authorization
         if (!user) {
@@ -58,13 +58,13 @@ export default class {
         success.send({ status: 'success', minAmount: await getMinimalAmount(pair) });
     }
 
-    static async getTradeEstimate(req : Object, res : Object) : Promise<void> {
+    static async tradeEstimate(req : Object, res : Object) : Promise<void> {
         const success = new SuccessResponse(res);
         const error = new ErrorResponse(res);
-        const body = req.body;
         const user = req.user;
-        const amount = body.amount;
-        const pair = body.pair;
+        const query = req.query;
+        const amount = query.amount;
+        const pair = query.pair;
 
         // ensure authorization
         if (!user) {
@@ -102,7 +102,7 @@ export default class {
         let error = new ErrorResponse(res);
 
         try {
-            const trade = await createTrade(pair, receiveAddress, tradeAmount, extraId, refundAddress);
+            let trade = await createTrade(pair, receiveAddress, tradeAmount, extraId, refundAddress);
 
             // check to make sure we created a trade
             if (!trade) {
@@ -117,7 +117,10 @@ export default class {
                 to:        trade.toCurrency
             };
 
-            await Trades.create(createObj);
+            const newTrade = await Trades.create(createObj);
+
+            // update trade id with id from database
+            trade.id = newTrade.id;
 
             success.send({
                 status: 'success',
@@ -129,8 +132,9 @@ export default class {
         }
     }
 
-    static async getTrades(req : Object, res : Object) : Promise<void> {
+    static async getAllTrades(req : Object, res : Object) : Promise<void> {
         const user = req.user;
+        const options = req.query;
 
         // ensure authorization
         if (!user) {
@@ -141,15 +145,18 @@ export default class {
         let error = new ErrorResponse(res);
 
         try {
+            const userId = user.userId;
+            const trades = await Trades.findAll({ userId });
+            const transactions = await getTransactions(options);
             let list = [];
-            const trades = await Trades.findAll({ userId: user.userId });
 
             for (let trade of trades) {
-                let id = trade.tradeId;
-                let status = await getTradeStatus(id);
-                status.id = trade.id;
-                delete status.isPartner;
-                list.push(status);
+                let transaction = transactions.find(x => x.id === trade.tradeId);
+                if (transaction) {
+                    transaction.id = trade.id;
+                    delete transaction.isPartner;
+                    list.push(transaction);
+                }
             }
 
             success.send({
@@ -162,9 +169,9 @@ export default class {
         }
     }
 
-    static async getTrade(req : Object, res : Object) : Promise<void> {
+    static async getTradeStatus(req : Object, res : Object) : Promise<void> {
         const user = req.user;
-        const id   = req.id;
+        const id   = req.params.tradeId;
 
         // ensure authorization
         if (!user) {
@@ -176,7 +183,9 @@ export default class {
 
         try {
             const trade = await Trades.findOne({ userId: user.userId, id });
-            const currentTradeStatus = await getTradeStatus(trade.tradeId);
+            let currentTradeStatus = await getTradeStatus(trade.tradeId);
+
+            currentTradeStatus.id = trade.id;
 
             success.send({
                 status: 'success',

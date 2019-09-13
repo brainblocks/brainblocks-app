@@ -3,6 +3,14 @@ import request from 'request-promise';
 
 const CHANGENOW_KEY = process.env.CHANGENOW_KEY || '';
 
+type TransactionOptions = {
+  to : ?string,
+  from : ?string,
+  status : ?string,
+  limit : ?number,
+  offset : ?number
+};
+
 export async function wait(ms : number) : Promise<void> {
     return await new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -168,6 +176,30 @@ export async function getTradeStatus(id : string) : Promise<{id : string, status
         res = await request({
             method:                  'GET',
             uri:                     `https://changenow.io/api/v1/transactions/${ id }/${ CHANGENOW_KEY }`,
+            resolveWithFullResponse: true
+        });
+    }
+
+    return JSON.parse(res.body);
+}
+
+export async function getTransactions(options : TransactionOptions) : Promise<Array<{id : string, status : string, hash : string, payinHash : string, payoutHash : string, payinAddress : string, payoutAddress : string, payinExtraId : string, payoutExtraId : string, fromCurrency : string, toCurrency : string, amountSend : number, amountReceive : number, networkFee : number, updatedAt : string, isPartner : boolean}>> {
+    let res;
+
+    try {
+        res = await request({
+            method:                  'GET',
+            uri:                     `https://changenow.io/api/v1/transactions/${ CHANGENOW_KEY }`,
+            qs:                      options,
+            resolveWithFullResponse: true
+        });
+    } catch (err) {
+        await wait(1000);
+
+        res = await request({
+            method:                  'GET',
+            uri:                     `https://changenow.io/api/v1/transactions/${ CHANGENOW_KEY }`,
+            qs:                      options,
             resolveWithFullResponse: true
         });
     }

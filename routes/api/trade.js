@@ -6,13 +6,13 @@ import { authenticate } from '../../middleware/auth';
 
 let router = express.Router();
 
-router.get('/pairs', authenticate, TradeController.getMarketPairs);
-router.get('/currencies', authenticate, TradeController.getTradeCurrencies);
-router.post('/minAmount', authenticate, TradeController.getMinimalAmountPair);
-router.post('/estimate', authenticate, TradeController.getTradeEstimate);
-router.post('/currencyPairs', authenticate, TradeController.getTradePairs);
-router.post('/create', authenticate, TradeController.createTrade);
-router.post('/getTrades', authenticate, TradeController.getTrades);
-router.post('/getTrade', authenticate, TradeController.getTrade);
+router.get('/pairs', authenticate, TradeController.marketPairs);
+router.get('/pairs/:currency', authenticate, TradeController.tradePairs);
+router.get('/currencies', authenticate, TradeController.tradeCurrencies);
+router.get('/minAmount/:pair', authenticate, TradeController.minimalAmountPair);
+router.get('/estimate', authenticate, TradeController.tradeEstimate);
+router.post('/create', TradeController.createTrade);
+router.get('/trades', TradeController.getAllTrades);
+router.get('/trades/:tradeId', TradeController.getTradeStatus);
 
 export default router;
