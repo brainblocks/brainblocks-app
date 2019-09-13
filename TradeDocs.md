@@ -15,7 +15,7 @@ GET= `/api/trade/minAmount/BTC_NANO`
 Response - `{"status": "success","minAmount": 0.0028174}`
 
 # Get a Trade Estimate
-POST `/api/trade/estimate?amount=1.5&pair=ETH_NANO`
+GET `/api/trade/estimate?amount=1.5&pair=ETH_NANO`
 Response - `{"status": "success","estimate": {"estimatedAmount": 267.9558662,"transactionSpeedForecast": "10-60","warningMessage": null}}`
 
 # Create Trade Transaction
@@ -28,5 +28,5 @@ GET `/api/trade/trades`
 Response - `{"status": "success","trades": [{"status": "waiting","payinAddress": "3BofZme8N8ww2AWT7pmPR9XSYcqkGFUPSK","payoutAddress": "nano_1brainb3zz81wmhxndsbrjb94hx3fhr1fyydmg6iresyk76f3k7y7jiazoji","fromCurrency": "btc","toCurrency": "nano","refundAddress": "3LKxArKXrJ7EfWrn1Ed6V82rVAQv8GML9s","id": 1,"updatedAt": "2019-08-17T02:47:55.066Z","expectedSendAmount": 1.5,"expectedReceiveAmount": 14429.8182207,"createdAt": "2019-08-17T02:47:55.066Z1`
 
 # Get Trade Status
-GET `/api/trade/trade/:tradeId`
+GET `/api/trade/trades/:tradeId`
 Response - `{"status": "success","trade": {"status": "waiting","payinAddress": "3BofZme8N8ww2AWT7pmPR9XSYcqkGFUPSK","payoutAddress": "nano_1brainb3zz81wmhxndsbrjb94hx3fhr1fyydmg6iresyk76f3k7y7jiazoji","fromCurrency": "btc","toCurrency": "nano","refundAddress": "3LKxArKXrJ7EfWrn1Ed6V82rVAQv8GML9s","id": 1,"updatedAt": "2019-08-17T02:47:55.066Z","expectedSendAmount": 1.5,"expectedReceiveAmount": 14429.8182207,"createdAt": "2019-08-17T02:47:55.066Z"}}`

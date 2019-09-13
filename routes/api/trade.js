@@ -13,6 +13,6 @@ router.get('/minAmount/:pair', authenticate, TradeController.minimalAmountPair);
 router.get('/estimate', authenticate, TradeController.tradeEstimate);
 router.post('/create', authenticate, TradeController.createTrade);
 router.get('/trades', authenticate, TradeController.getAllTrades);
-router.get('/trades/:tradeId', authenticate, TradeController.getTradeStatus);
+router.get('/trades/:tradeId', authenticate, TradeController.getTrade);
 
 export default router;

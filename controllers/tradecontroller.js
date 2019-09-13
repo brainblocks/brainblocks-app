@@ -111,7 +111,7 @@ export default class {
 
             // create trade
             const createObj = {
-                userId:    user.userId,
+                userId:    user.id,
                 tradeId:   trade.id,
                 from:      trade.fromCurrency,
                 to:        trade.toCurrency
@@ -174,7 +174,7 @@ export default class {
         }
     }
 
-    static async getTradeStatus(req : Object, res : Object) : Promise<void> {
+    static async getTrade(req : Object, res : Object) : Promise<void> {
         const user = req.user;
         const id   = req.params.tradeId;
 
@@ -187,7 +187,7 @@ export default class {
         let error = new ErrorResponse(res);
 
         try {
-            const trade = await Trades.findOne({ userId: user.userId, id });
+            const trade = await Trades.findOne({ where: { userId: user.id, id }});
             let currentTradeStatus = await getTradeStatus(trade.tradeId);
 
             currentTradeStatus.id = trade.id;
