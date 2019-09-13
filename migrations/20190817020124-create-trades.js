@@ -4,10 +4,10 @@ export default {
     up: (queryInterface : Object, Sequelize : Object) => {
         return queryInterface.createTable('Trades', {
             id: {
-                allowNull:  false,
-                primaryKey: true,
-                unique:     true,
-                type:       Sequelize.UUID
+                allowNull:    false,
+                primaryKey:   true,
+                unique:       true,
+                type:         Sequelize.UUID
             },
             userId: {
                 type: Sequelize.INTEGER

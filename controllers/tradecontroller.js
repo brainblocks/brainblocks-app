@@ -1,4 +1,6 @@
 /* @flow */
+import uuid from 'uuid/v4';
+
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
@@ -111,10 +113,11 @@ export default class {
 
             // create trade
             const createObj = {
-                userId:    user.id,
-                tradeId:   trade.id,
-                from:      trade.fromCurrency,
-                to:        trade.toCurrency
+                id:      uuid(),
+                userId:  user.id,
+                tradeId: trade.id,
+                from:    trade.fromCurrency,
+                to:      trade.toCurrency
             };
 
             const newTrade = await Trades.create(createObj);
