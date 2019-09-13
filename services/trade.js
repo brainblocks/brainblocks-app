@@ -15,7 +15,7 @@ export async function wait(ms : number) : Promise<void> {
     return await new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function getMarketPairs() : Promise<Array<string>> {
+export async function marketPairs() : Promise<Array<string>> {
     let res;
 
     try {
@@ -37,7 +37,7 @@ export async function getMarketPairs() : Promise<Array<string>> {
     return JSON.parse(res.body);
 }
 
-export async function getTradeCurrencies() : Promise<Array<{ticker : string, image : string, hasExternalId : boolean, isFiat : boolean, supportsFixedRate : boolean, featured : boolean}>> {
+export async function tradeCurrencies() : Promise<Array<{ticker : string, image : string, hasExternalId : boolean, isFiat : boolean, supportsFixedRate : boolean, featured : boolean}>> {
     let res;
 
     try {
@@ -59,7 +59,7 @@ export async function getTradeCurrencies() : Promise<Array<{ticker : string, ima
     return JSON.parse(res.body);
 }
 
-export async function getTradePairs(currency : string) : Promise<Array<{ticker : string, image : string, hasExternalId : boolean, isFiat : boolean, supportsFixedRate : boolean, featured : boolean}>> {
+export async function tradePairs(currency : string) : Promise<Array<{ticker : string, image : string, hasExternalId : boolean, isFiat : boolean, supportsFixedRate : boolean, featured : boolean}>> {
     let res;
 
     try {
@@ -81,7 +81,7 @@ export async function getTradePairs(currency : string) : Promise<Array<{ticker :
     return JSON.parse(res.body);
 }
 
-export async function getMinimalAmount(pair : string) : Promise<number> {
+export async function minimalAmount(pair : string) : Promise<number> {
     let res;
 
     try {
@@ -103,7 +103,7 @@ export async function getMinimalAmount(pair : string) : Promise<number> {
     return JSON.parse(res.body).minAmount;
 }
 
-export async function getTradeEstimate(pair : string, amount : number) : Promise<{estimatedAmount : number, transactionSpeedForecast : string, warningMessage : string}> {
+export async function tradeEstimate(pair : string, amount : number) : Promise<{estimatedAmount : number, transactionSpeedForecast : string, warningMessage : string}> {
     let res;
 
     try {
@@ -161,7 +161,7 @@ export async function createTrade(pair : string, receiveAddress : string, tradeA
     return JSON.parse(res.body);
 }
 
-export async function getTradeStatus(id : string) : Promise<{id : string, status : string, hash : string, payinHash : string, payoutHash : string, payinAddress : string, payoutAddress : string, payinExtraId : string, payoutExtraId : string, fromCurrency : string, toCurrency : string, amountSend : number, amountReceive : number, networkFee : number, updatedAt : string, isPartner : boolean}> {
+export async function tradeStatus(id : string) : Promise<{id : string, status : string, hash : string, payinHash : string, payoutHash : string, payinAddress : string, payoutAddress : string, payinExtraId : string, payoutExtraId : string, fromCurrency : string, toCurrency : string, amountSend : number, amountReceive : number, networkFee : number, updatedAt : string, isPartner : boolean}> {
     let res;
 
     try {

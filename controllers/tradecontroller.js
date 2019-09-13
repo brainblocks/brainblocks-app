@@ -2,7 +2,7 @@
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
-import { getTradeCurrencies, getTradePairs, getTradeEstimate, createTrade, getMarketPairs, getMinimalAmount, getTradeStatus, getTransactions } from '../services/trade';
+import { tradeCurrencies, tradePairs, tradeEstimate, createTrade, marketPairs, minimalAmount, tradeStatus, getTransactions } from '../services/trade';
 
 const { Trades } = models.models;
 
@@ -17,7 +17,7 @@ export default class {
             return res.status(401).send({ error: 'Not authorized' });
         }
 
-        success.send({ status: 'success', pairs: await getMarketPairs() });
+        success.send({ status: 'success', pairs: await marketPairs() });
     }
 
     static async tradeCurrencies(req : Object, res : Object) : Promise<void> {
@@ -29,7 +29,7 @@ export default class {
             return res.status(401).send({ error: 'Not authorized' });
         }
 
-        success.send({ status: 'success', currencies: await getTradeCurrencies() });
+        success.send({ status: 'success', currencies: await tradeCurrencies() });
     }
 
     static async tradePairs(req : Object, res : Object) : Promise<void> {
@@ -42,7 +42,7 @@ export default class {
             return res.status(401).send({ error: 'Not authorized' });
         }
 
-        success.send({ status: 'success', currencies: await getTradePairs(currency) });
+        success.send({ status: 'success', currencies: await tradePairs(currency) });
     }
 
     static async minimalAmountPair(req : Object, res : Object) : Promise<void> {
@@ -55,7 +55,7 @@ export default class {
             return res.status(401).send({ error: 'Not authorized' });
         }
 
-        success.send({ status: 'success', minAmount: await getMinimalAmount(pair) });
+        success.send({ status: 'success', minAmount: await minimalAmount(pair) });
     }
 
     static async tradeEstimate(req : Object, res : Object) : Promise<void> {
@@ -72,7 +72,7 @@ export default class {
         }
 
         try {
-            const estimate = await getTradeEstimate(pair, amount);
+            const estimate = await tradeEstimate(pair, amount);
 
             success.send({
                 status: 'success',
@@ -187,8 +187,8 @@ export default class {
         let error = new ErrorResponse(res);
 
         try {
-            const trade = await Trades.findOne({ where: { userId: user.id, id }});
-            let currentTradeStatus = await getTradeStatus(trade.tradeId);
+            const trade = await Trades.findOne({ where: { userId: user.id, id } });
+            let currentTradeStatus = await tradeStatus(trade.tradeId);
 
             currentTradeStatus.id = trade.id;
 
