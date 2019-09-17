@@ -153,8 +153,8 @@ export default class {
         let error = new ErrorResponse(res);
 
         try {
-            const userId = user.userId;
-            const trades = await Trades.findAll({ userId });
+            const userId = user.id;
+            const trades = await Trades.findAll({where: { userId }});
             const transactions = await getTransactions(options);
             let list = [];
 
