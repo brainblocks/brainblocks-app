@@ -154,7 +154,7 @@ export default class {
 
         try {
             const userId = user.id;
-            const trades = await Trades.findAll({where: { userId }});
+            const trades = await Trades.findAll({ where: { userId } });
             const transactions = await getTransactions(options);
             let list = [];
 
