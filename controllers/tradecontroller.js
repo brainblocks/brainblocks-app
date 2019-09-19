@@ -4,7 +4,7 @@ import uuid from 'uuid/v4';
 import models from '../models';
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
-import { tradeCurrencies, tradePairs, tradeEstimate, createTrade, marketPairs, minimalAmount, tradeStatus, getTransactions } from '../services/trade';
+import { tradeCurrencies, tradePairs, tradeEstimate, createTrade, marketPairs, minimalAmount, tradeStatus } from '../services/trade';
 
 const { Trades } = models.models;
 
@@ -142,7 +142,6 @@ export default class {
 
     static async getAllTrades(req : Object, res : Object) : Promise<void> {
         const user = req.user;
-        const options = req.query;
 
         // ensure authorization
         if (!user) {
@@ -155,15 +154,22 @@ export default class {
         try {
             const userId = user.id;
             const trades = await Trades.findAll({ where: { userId } });
-            const transactions = await getTransactions(options);
-            let list = [];
+            const list = [];
+            const tradeRequests = [];
 
+            // fire off all trade status request
             for (let trade of trades) {
-                let transaction = transactions.find(x => x.id === trade.tradeId);
-                if (transaction) {
-                    transaction.id = trade.id;
-                    delete transaction.isPartner;
-                    list.push(transaction);
+                tradeRequests.push(tradeStatus(trade.tradeId));
+            }
+
+            // await trade requests and process them
+            for (let request of tradeRequests) {
+                let response = await request;
+                const trade = trades.find(x => x.tradeId === response.id);
+                if (trade) {
+                    response.id = trade.id;
+                    delete response.isPartner;
+                    list.push(response);
                 }
             }
 
