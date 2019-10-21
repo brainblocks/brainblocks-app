@@ -1,12 +1,9 @@
 /* @flow */
 import express from 'express';
 import WebSocket from 'ws';
-// import dotenv from 'dotenv';
 
 import SuccessResponse from '../../responses/success_response';
 import { getInfo, getPending } from '../../services/nano-node';
-
-// const config = dotenv.config();
 
 let router = express.Router();
 

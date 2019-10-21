@@ -1,10 +1,14 @@
 /* @flow */
 import bigInt from 'big-integer';
-// import rp from 'request-promise';
+import request from 'request-promise';
 
 import SuccessResponse from '../responses/success_response';
 import ErrorResponse from '../responses/error_response';
 import { getChains, republishBlock, getBalance, getBlockAccount, process, generateWork } from '../services/nano-node';
+
+export async function wait(ms : number) : Promise<void> {
+    return await new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export default class {
 
@@ -26,43 +30,52 @@ export default class {
         }
     }
 
-    // static async faucet(req : Object, res : Object) : Promise<void> {
-    //     let success = new SuccessResponse(res);
-    //     let error = new ErrorResponse(res);
-    //     const address = req.body.address;
-    //     const ip = req.body.ip;
-    //     const ua = req.body.useragent;
-    //
-    //     if (!process.env.FAUCET) {
-    //         return error.send('Error requesting faucet');
-    //     }
-    //
-    //     let options = {
-    //         method: 'POST',
-    //         uri:    'https://nano-faucet.org/nano/send.php',
-    //         body:   {
-    //             address,
-    //             ip_address: ip,
-    //             user_agent: ua,
-    //             api_key:    process.env.FAUCET
-    //         },
-    //         json: false // Automatically stringifies the body to JSON
-    //     };
-    //
-    //     await rp(options)
-    //         .then((parsed) => {
-    //             console.log(parsed);
-    //             if (parsed.includes('Nano Sent')) {
-    //                 success.send({
-    //                     status:   'success'
-    //                 });
-    //             }
-    //         })
-    //         .catch((err) => {
-    //             console.error(`Error requesting faucet`, err);
-    //             return error.send('Error requesting faucet');
-    //         });
-    // }
+    static async faucet(req : Object, res : Object) : Promise<void> {
+        let success = new SuccessResponse(res);
+        let error = new ErrorResponse(res);
+        const address = req.body.address;
+        const ip = req.body.ip;
+        const ua = req.body.useragent;
+
+        let body = JSON.stringify({ address, ip_address: ip, user_agent: ua, api_key: '6c417b8f-3fa5-4aaa-9464-e57151ca4552' });
+
+        let response;
+
+        try {
+            response = await request({
+                method:                  'POST',
+                uri:                     'https://nano-faucet.org/nano/send.php',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body,
+                resolveWithFullResponse: true
+            });
+        } catch (err) {
+            await wait(1000);
+
+            response = await request({
+                method:                  'POST',
+                uri:                     'https://nano-faucet.org/nano/send.php',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body,
+                resolveWithFullResponse: true
+            });
+        }
+
+        const parsedData = JSON.parse(response);
+
+        if (parsedData.includes('Nano Sent')) {
+            success.send({
+                status:   'success'
+            });
+        } else {
+            console.error(`Error requesting faucet`);
+            return error.send('Error requesting faucet');
+        }
+    }
 
     static async republish(req : Object, res : Object) : Promise<void> {
         const hash = req.body.hash;

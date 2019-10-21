@@ -223,8 +223,13 @@ export default class {
             return error.badRequest('Token must be provided');
         }
 
-        userToken.destroy();
-        return success.send('Successfully Logged out');
+        try {
+            await userToken.destroy();
+            return success.send('Successfully Logged out');
+        } catch (err) {
+            console.error(`Error logging out`, err);
+            return error.send('Could not log out');
+        }
     }
 
     static async validatepwd(req : Object, res : Object) : Object {
